@@ -1,0 +1,369 @@
+@import 'tailwindcss';
+
+@import 'tw-animate-css';
+
+@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
+@source '../../storage/framework/views/*.php';
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+    --font-sans:
+        'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif,
+        'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol',
+        'Noto Color Emoji';
+
+    --radius-lg: var(--radius);
+    --radius-md: calc(var(--radius) - 2px);
+    --radius-sm: calc(var(--radius) - 4px);
+
+    --color-background: var(--background);
+    --color-foreground: var(--foreground);
+
+    --color-card: var(--card);
+    --color-card-foreground: var(--card-foreground);
+
+    --color-popover: var(--popover);
+    --color-popover-foreground: var(--popover-foreground);
+
+    --color-primary: var(--primary);
+    --color-primary-foreground: var(--primary-foreground);
+
+    --color-secondary: var(--secondary);
+    --color-secondary-foreground: var(--secondary-foreground);
+
+    --color-muted: var(--muted);
+    --color-muted-foreground: var(--muted-foreground);
+
+    --color-accent: var(--accent);
+    --color-accent-foreground: var(--accent-foreground);
+
+    --color-destructive: var(--destructive);
+    --color-destructive-foreground: var(--destructive-foreground);
+
+    --color-border: var(--border);
+    --color-input: var(--input);
+    --color-ring: var(--ring);
+
+    --color-chart-1: var(--chart-1);
+    --color-chart-2: var(--chart-2);
+    --color-chart-3: var(--chart-3);
+    --color-chart-4: var(--chart-4);
+    --color-chart-5: var(--chart-5);
+
+    --color-sidebar: var(--sidebar-background);
+    --color-sidebar-foreground: var(--sidebar-foreground);
+    --color-sidebar-primary: var(--sidebar-primary);
+    --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+    --color-sidebar-accent: var(--sidebar-accent);
+    --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+    --color-sidebar-border: var(--sidebar-border);
+    --color-sidebar-ring: var(--sidebar-ring);
+}
+
+/*
+  The default border color has changed to `currentColor` in Tailwind CSS v4,
+  so we've added these compatibility styles to make sure everything still
+  looks the same as it did with Tailwind CSS v3.
+
+  If we ever want to remove these styles, we need to add an explicit border
+  color utility to any element that depends on these defaults.
+*/
+@layer base {
+    *,
+    ::after,
+    ::before,
+    ::backdrop,
+    ::file-selector-button {
+        border-color: var(--color-gray-200, currentColor);
+    }
+}
+
+@layer utilities {
+    body,
+    html {
+        --font-sans:
+            'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif,
+            'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol',
+            'Noto Color Emoji';
+    }
+}
+
+:root {
+    --background: hsl(210 40% 98%);
+    --foreground: hsl(222 47% 11%);
+    --card: hsl(0 0% 100%);
+    --card-foreground: hsl(222 47% 11%);
+    --popover: hsl(0 0% 100%);
+    --popover-foreground: hsl(222 47% 11%);
+    --primary: hsl(164 84% 35%);
+    --primary-foreground: hsl(210 40% 98%);
+    --secondary: hsl(210 40% 96%);
+    --secondary-foreground: hsl(222 47% 11%);
+    --muted: hsl(210 40% 96%);
+    --muted-foreground: hsl(215 16% 42%);
+    --accent: hsl(166 52% 95%);
+    --accent-foreground: hsl(164 84% 25%);
+    --destructive: hsl(0 72% 51%);
+    --destructive-foreground: hsl(0 0% 98%);
+    --border: hsl(214 32% 91%);
+    --input: hsl(214 32% 91%);
+    --ring: hsl(164 84% 35%);
+    --chart-1: hsl(164 84% 35%);
+    --chart-2: hsl(200 98% 39%);
+    --chart-3: hsl(220 53% 33%);
+    --chart-4: hsl(33 96% 55%);
+    --chart-5: hsl(346 77% 49%);
+    --radius: 1rem;
+    --sidebar-background: hsl(210 40% 98%);
+    --sidebar-foreground: hsl(222 47% 11%);
+    --sidebar-primary: hsl(164 84% 35%);
+    --sidebar-primary-foreground: hsl(210 40% 98%);
+    --sidebar-accent: hsl(166 52% 95%);
+    --sidebar-accent-foreground: hsl(164 84% 25%);
+    --sidebar-border: hsl(214 32% 91%);
+    --sidebar-ring: hsl(164 84% 35%);
+    --sidebar: hsl(210 40% 98%);
+    --crm-page-width: 84rem;
+    --crm-panel-shadow: 0 20px 48px -30px rgba(15, 23, 42, 0.32);
+    --crm-panel-shadow-dark: 0 28px 60px -38px rgba(2, 6, 23, 0.92);
+}
+
+.dark {
+    --background: hsl(222 47% 7%);
+    --foreground: hsl(210 40% 98%);
+    --card: hsl(222 47% 9%);
+    --card-foreground: hsl(210 40% 98%);
+    --popover: hsl(222 47% 9%);
+    --popover-foreground: hsl(210 40% 98%);
+    --primary: hsl(164 84% 41%);
+    --primary-foreground: hsl(222 47% 9%);
+    --secondary: hsl(217 33% 17%);
+    --secondary-foreground: hsl(210 40% 98%);
+    --muted: hsl(217 33% 17%);
+    --muted-foreground: hsl(215 20% 65%);
+    --accent: hsl(164 44% 16%);
+    --accent-foreground: hsl(164 84% 75%);
+    --destructive: hsl(0 72% 51%);
+    --destructive-foreground: hsl(0 0% 98%);
+    --border: hsl(217 33% 17%);
+    --input: hsl(217 33% 17%);
+    --ring: hsl(164 84% 45%);
+    --chart-1: hsl(164 84% 41%);
+    --chart-2: hsl(199 89% 48%);
+    --chart-3: hsl(47 96% 53%);
+    --chart-4: hsl(280 89% 67%);
+    --chart-5: hsl(346 87% 62%);
+    --sidebar-background: hsl(222 47% 8%);
+    --sidebar-foreground: hsl(210 40% 96%);
+    --sidebar-primary: hsl(164 84% 41%);
+    --sidebar-primary-foreground: hsl(222 47% 9%);
+    --sidebar-accent: hsl(217 33% 17%);
+    --sidebar-accent-foreground: hsl(210 40% 96%);
+    --sidebar-border: hsl(217 33% 17%);
+    --sidebar-ring: hsl(164 84% 45%);
+    --sidebar: hsl(222 47% 8%);
+}
+
+@layer base {
+    * {
+        @apply border-border outline-ring/50;
+    }
+    html {
+        @apply scroll-smooth bg-slate-50 dark:bg-slate-950;
+    }
+    body {
+        @apply min-h-screen bg-background text-foreground;
+        background-image:
+            radial-gradient(
+                circle at top,
+                rgba(16, 185, 129, 0.09),
+                transparent 28%
+            ),
+            linear-gradient(
+                180deg,
+                rgba(248, 250, 252, 0.92),
+                rgba(255, 255, 255, 1)
+            );
+        background-attachment: fixed;
+        line-height: 1.5;
+    }
+    .dark body {
+        background-image:
+            radial-gradient(
+                circle at top,
+                rgba(16, 185, 129, 0.12),
+                transparent 28%
+            ),
+            linear-gradient(180deg, rgba(2, 6, 23, 1), rgba(15, 23, 42, 1));
+    }
+
+    ::selection {
+        background: color-mix(in srgb, var(--primary) 24%, white);
+        color: var(--foreground);
+    }
+}
+
+@layer components {
+    .crm-page {
+        width: min(100%, var(--crm-page-width));
+        min-width: 0;
+        margin-inline: auto;
+        display: flex;
+        flex: 1;
+        flex-direction: column;
+        gap: 2rem;
+        padding: 1.25rem;
+    }
+
+    .crm-page-header {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .crm-page-heading {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+
+    .crm-page-title {
+        max-width: 16ch;
+        font-size: clamp(2rem, 1.7rem + 1vw, 3rem);
+        line-height: 1.05;
+        font-weight: 700;
+        letter-spacing: -0.04em;
+        color: hsl(222 47% 11%);
+    }
+
+    .crm-page-description {
+        max-width: 42rem;
+        font-size: 0.95rem;
+        line-height: 1.7;
+        color: hsl(215 16% 42%);
+    }
+
+    .crm-page-actions {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .crm-eyebrow {
+        font-size: 0.75rem;
+        font-weight: 700;
+        letter-spacing: 0.28em;
+        text-transform: uppercase;
+        color: var(--primary);
+    }
+
+    .crm-panel {
+        border: 1px solid color-mix(in srgb, var(--border) 78%, transparent);
+        border-radius: 1.75rem;
+        background: color-mix(in srgb, var(--card) 90%, transparent);
+        box-shadow: var(--crm-panel-shadow);
+        backdrop-filter: blur(18px);
+    }
+
+    .crm-panel-body {
+        padding: 1.25rem;
+    }
+
+    .crm-subtle-panel {
+        border: 1px solid color-mix(in srgb, var(--border) 72%, transparent);
+        border-radius: 1.35rem;
+        background: color-mix(in srgb, var(--secondary) 72%, transparent);
+        padding: 1rem;
+    }
+
+    .crm-list-item {
+        border: 1px solid color-mix(in srgb, var(--border) 72%, transparent);
+        border-radius: 1.35rem;
+        background: color-mix(in srgb, var(--secondary) 72%, transparent);
+        padding: 1rem;
+        transition:
+            transform 180ms ease,
+            border-color 180ms ease,
+            background-color 180ms ease,
+            box-shadow 180ms ease;
+    }
+
+    .crm-list-item:hover {
+        transform: translateY(-1px);
+        border-color: color-mix(in srgb, var(--primary) 38%, var(--border));
+        background: color-mix(in srgb, var(--card) 94%, transparent);
+        box-shadow: 0 18px 34px -28px rgba(15, 23, 42, 0.35);
+    }
+
+    .crm-field {
+        width: 100%;
+        min-height: 2.75rem;
+        border: 1px solid color-mix(in srgb, var(--input) 92%, transparent);
+        border-radius: 1rem;
+        background: color-mix(in srgb, var(--card) 72%, transparent);
+        padding: 0.625rem 0.875rem;
+        font-size: 0.95rem;
+        color: var(--foreground);
+        transition:
+            border-color 140ms ease,
+            box-shadow 140ms ease,
+            background-color 140ms ease;
+    }
+
+    .crm-field:hover {
+        background: color-mix(in srgb, var(--card) 86%, transparent);
+    }
+
+    .crm-field:focus {
+        border-color: color-mix(in srgb, var(--ring) 58%, var(--input));
+        box-shadow: 0 0 0 4px color-mix(in srgb, var(--ring) 16%, transparent);
+        outline: none;
+    }
+
+    .crm-field option {
+        color: var(--foreground);
+        background: var(--card);
+    }
+
+    .dark .crm-page-title {
+        color: hsl(210 40% 98%);
+    }
+
+    .dark .crm-page-description {
+        color: hsl(215 20% 65%);
+    }
+
+    .dark .crm-panel {
+        box-shadow: var(--crm-panel-shadow-dark);
+    }
+
+    .dark .crm-list-item:hover {
+        box-shadow: 0 18px 42px -30px rgba(2, 6, 23, 0.95);
+    }
+}
+
+@media (min-width: 768px) {
+    .crm-page {
+        padding: 1.5rem;
+    }
+
+    .crm-panel-body {
+        padding: 1.5rem;
+    }
+}
+
+@media (min-width: 1024px) {
+    .crm-page-header {
+        flex-direction: row;
+        align-items: flex-end;
+        justify-content: space-between;
+    }
+}
+
+@media (min-width: 1280px) {
+    .crm-page {
+        padding: 2rem;
+    }
+}
