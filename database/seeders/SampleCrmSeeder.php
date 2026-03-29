@@ -18,7 +18,7 @@ class SampleCrmSeeder extends Seeder
         $owner = User::query()->updateOrCreate(
             ['email' => 'owner@example.com'],
             [
-                'name' => 'Morgan Ellis',
+                'name' => 'Osama Bin Laden',
                 'password' => Hash::make('password'),
                 'email_verified_at' => now(),
             ],
@@ -33,30 +33,30 @@ class SampleCrmSeeder extends Seeder
                 'provider_user_id' => 'google-owner-001',
                 'provider_email' => $owner->email,
                 'provider_email_verified_at' => now(),
-                'avatar' => 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=160&q=80',
+                'avatar' => 'https://images.unsplash.com/photo-1493106819501-66d381c466f1?q=80&w=687&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
             ],
         );
 
         Client::factory()
-            ->count(4)
+            ->count(15)
             ->for($owner)
             ->withStatus(ClientStatus::Lead)
             ->create();
 
         Client::factory()
-            ->count(5)
+            ->count(10)
             ->for($owner)
             ->withStatus(ClientStatus::Active)
             ->create();
 
         Client::factory()
-            ->count(3)
+            ->count(9)
             ->for($owner)
             ->withStatus(ClientStatus::Completed)
             ->create();
 
         Client::factory()
-            ->count(2)
+            ->count(11)
             ->for($owner)
             ->archived()
             ->create();

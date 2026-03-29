@@ -12,7 +12,7 @@ import {
     UserPlus2,
     UsersRound,
 } from 'lucide-vue-next';
-import { reactive } from 'vue';
+import { reactive, ref } from 'vue';
 import EmptyState from '@/components/crm/EmptyState.vue';
 import PageHeader from '@/components/crm/PageHeader.vue';
 import PaginationLinks from '@/components/crm/PaginationLinks.vue';
@@ -47,7 +47,6 @@ import type {
     ClientStatusOption,
     Paginated,
 } from '@/types';
-import { ref } from 'vue';
 
 const props = defineProps<{
     clients: Paginated<ClientListItem>;
@@ -374,22 +373,22 @@ const submitImport = () => {
 
             <div v-if="clients.data.length > 0">
                 <div
-                    class="hidden grid-cols-[minmax(0,2fr)_1.1fr_1fr_0.9fr_0.9fr_auto] gap-4 border-b border-slate-200/70 px-6 py-4 text-xs font-semibold tracking-[0.18em] text-slate-400 uppercase md:grid dark:border-slate-800"
+                    class="hidden grid-cols-[minmax(18rem,2.4fr)_minmax(8rem,0.9fr)_minmax(8rem,0.8fr)_minmax(10rem,1fr)_minmax(7rem,0.8fr)_auto] gap-6 border-b border-slate-200/70 px-10 py-4 pr-24 text-xs font-semibold tracking-[0.18em] text-slate-400 uppercase lg:grid dark:border-slate-800"
                 >
-                    <span>Client</span>
-                    <span>Status</span>
-                    <span>Budget</span>
-                    <span>Follow-up</span>
-                    <span>Updated</span>
-                    <span class="text-right">Actions</span>
+                    <span class="self-center justify-self-start">Client</span>
+                    <span class="self-center justify-self-start">Status</span>
+                    <span class="self-center justify-self-start">Budget</span>
+                    <span class="self-center justify-self-start">Follow-up</span>
+                    <span class="self-center justify-self-start">Updated</span>
+                    <span class="self-center justify-self-end text-right">Actions</span>
                 </div>
 
                 <div
                     v-for="client in clients.data"
                     :key="client.id"
-                    class="grid gap-4 border-b border-slate-200/70 px-6 py-5 transition last:border-0 hover:bg-white/35 md:grid-cols-[minmax(0,2fr)_1.1fr_1fr_0.9fr_0.9fr_auto] md:items-center dark:border-slate-800 dark:hover:bg-slate-900/30"
+                    class="grid gap-4 border-b border-slate-200/70 px-6 py-5 transition last:border-0 hover:bg-white/35 lg:grid-cols-[minmax(18rem,2.4fr)_minmax(8rem,0.9fr)_minmax(8rem,0.8fr)_minmax(10rem,1fr)_minmax(7rem,0.8fr)_auto] lg:items-center lg:gap-6 dark:border-slate-800 dark:hover:bg-slate-900/30"
                 >
-                    <div class="min-w-0">
+                    <div class="min-w-0 self-center justify-self-start">
                         <Link
                             :href="showClient(client.id)"
                             class="text-base font-semibold text-slate-950 transition hover:text-emerald-600 dark:text-white dark:hover:text-emerald-300"
@@ -412,7 +411,7 @@ const submitImport = () => {
                         </div>
                     </div>
 
-                    <div>
+                    <div class="min-w-0 self-center justify-self-start">
                         <StatusBadge
                             :status="client.status"
                             :label="client.status_label"
@@ -420,23 +419,31 @@ const submitImport = () => {
                         />
                     </div>
 
-                    <div class="text-sm text-slate-600 dark:text-slate-300">
+                    <div
+                        class="min-w-0 self-center justify-self-start text-sm text-slate-600 dark:text-slate-300"
+                    >
                         {{ formatCurrency(client.budget) }}
                     </div>
 
                     <div
-                        class="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-300"
+                        class="flex min-w-0 items-center gap-2 self-center justify-self-start text-sm text-slate-600 dark:text-slate-300"
                     >
-                        <CalendarClock class="size-4 text-slate-400" />
-                        {{ formatDate(client.follow_up_at) }}
+                        <CalendarClock
+                            class="size-4 shrink-0 text-slate-400"
+                        />
+                        <span class="truncate">{{
+                            formatDate(client.follow_up_at)
+                        }}</span>
                     </div>
 
-                    <div class="text-sm text-slate-500 dark:text-slate-400">
+                    <div
+                        class="min-w-0 self-center justify-self-start text-sm text-slate-500 dark:text-slate-400"
+                    >
                         {{ formatRelativeTime(client.updated_at) }}
                     </div>
 
                     <div
-                        class="flex items-center justify-start gap-2 md:justify-end"
+                        class="flex items-center justify-start gap-2 self-center justify-self-end lg:justify-end"
                     >
                         <Button variant="ghost" size="sm" as-child>
                             <Link :href="showClient(client.id)">Open</Link>
