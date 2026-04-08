@@ -1,8 +1,11 @@
 <script setup lang="ts">
+import { usePage } from '@inertiajs/vue3';
+import { computed } from 'vue';
 import Breadcrumbs from '@/components/Breadcrumbs.vue';
 import FlashMessages from '@/components/crm/FlashMessages.vue';
+import UserRoleBadge from '@/components/crm/UserRoleBadge.vue';
 import { SidebarTrigger } from '@/components/ui/sidebar';
-import type { BreadcrumbItem } from '@/types';
+import type { BreadcrumbItem, User } from '@/types';
 
 withDefaults(
     defineProps<{
@@ -12,6 +15,9 @@ withDefaults(
         breadcrumbs: () => [],
     },
 );
+
+const page = usePage();
+const user = computed(() => page.props.auth.user as User | null);
 </script>
 
 <template>
@@ -26,6 +32,14 @@ withDefaults(
                 <template v-if="breadcrumbs && breadcrumbs.length > 0">
                     <Breadcrumbs :breadcrumbs="breadcrumbs" />
                 </template>
+            </div>
+
+            <div v-if="user" class="ml-auto flex items-center gap-3">
+                <UserRoleBadge
+                    :role="user.role"
+                    :label="user.role_label"
+                    :show-prefix="true"
+                />
             </div>
         </header>
         <div class="mx-auto w-full max-w-[84rem] px-4 pb-4 md:px-6 lg:px-8">

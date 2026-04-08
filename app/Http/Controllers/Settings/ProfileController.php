@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Settings;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Settings\ProfileDeleteRequest;
 use App\Http\Requests\Settings\ProfileUpdateRequest;
+use App\Http\Requests\Settings\ReminderPreferencesRequest;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -40,6 +41,15 @@ class ProfileController extends Controller
         $request->user()->save();
 
         return to_route('profile.edit');
+    }
+
+    public function updateReminderPreferences(ReminderPreferencesRequest $request): RedirectResponse
+    {
+        $request->user()->forceFill([
+            'receives_follow_up_reminders' => $request->validated('receives_follow_up_reminders'),
+        ])->save();
+
+        return back()->with('success', 'Reminder preferences updated successfully.');
     }
 
     /**

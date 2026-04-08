@@ -5,11 +5,13 @@ import ProfileController from '@/actions/App/Http/Controllers/Settings/ProfileCo
 import DeleteUser from '@/components/DeleteUser.vue';
 import Heading from '@/components/Heading.vue';
 import SocialProviderIcon from '@/components/crm/SocialProviderIcon.vue';
+import UserRoleBadge from '@/components/crm/UserRoleBadge.vue';
 import InputError from '@/components/InputError.vue';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { edit } from '@/routes/profile';
+import updateReminderPreferences from '@/routes/profile/reminders';
 import social from '@/routes/social';
 import { send } from '@/routes/verification';
 import type { SocialProviderOption, User } from '@/types';
@@ -90,11 +92,18 @@ function disconnectProvider(providerName: string, label: string): void {
                             {{ user.name.slice(0, 1) }}
                         </div>
                         <div class="space-y-1">
-                            <p
-                                class="text-lg font-semibold text-slate-950 dark:text-white"
-                            >
-                                {{ user.name }}
-                            </p>
+                            <div class="flex flex-wrap items-center gap-3">
+                                <p
+                                    class="text-lg font-semibold text-slate-950 dark:text-white"
+                                >
+                                    {{ user.name }}
+                                </p>
+                                <UserRoleBadge
+                                    :role="user.role"
+                                    :label="user.role_label"
+                                    :show-prefix="true"
+                                />
+                            </div>
                             <p
                                 class="text-sm text-slate-500 dark:text-slate-400"
                             >
@@ -325,6 +334,51 @@ function disconnectProvider(providerName: string, label: string): void {
                     configured in your environment.
                 </div>
             </div>
+        </div>
+
+        <div class="space-y-6">
+            <Heading
+                variant="small"
+                title="Reminder emails"
+                description="Choose whether CRM Lite should email you a follow-up digest when clients need attention."
+            />
+
+            <Form
+                :action="updateReminderPreferences.update.url()"
+                method="patch"
+                class="space-y-5 rounded-[1.6rem] border border-slate-200/80 bg-white/90 p-6 shadow-sm dark:border-slate-800 dark:bg-slate-950/80"
+                v-slot="{ processing }"
+            >
+                <label class="flex items-start gap-3">
+                    <input
+                        type="checkbox"
+                        name="receives_follow_up_reminders"
+                        value="1"
+                        :checked="user.receives_follow_up_reminders"
+                        class="mt-1 size-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500"
+                    />
+                    <span class="space-y-1">
+                        <span class="block font-medium text-slate-950 dark:text-white">
+                            Send me daily follow-up reminders
+                        </span>
+                        <span class="block text-sm text-slate-500 dark:text-slate-400">
+                            Best for staying on top of overdue and upcoming follow-ups without logging in first.
+                        </span>
+                    </span>
+                </label>
+
+                <p class="text-sm text-slate-500 dark:text-slate-400">
+                    Last digest sent:
+                    {{ user.last_follow_up_digest_sent_at || 'No digest has been sent yet.' }}
+                </p>
+
+                <Button
+                    :disabled="processing"
+                    class="rounded-xl bg-slate-950 hover:bg-slate-800 dark:bg-white dark:text-slate-950 dark:hover:bg-slate-100"
+                >
+                    Save reminder preference
+                </Button>
+            </Form>
         </div>
     </div>
 

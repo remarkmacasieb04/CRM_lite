@@ -86,3 +86,19 @@ export function formatRelativeTime(value: string | null | undefined): string {
 
     return relativeFormatter.format(days, 'day');
 }
+
+export function formatFileSize(value: number | null | undefined): string {
+    if (!value || value <= 0) {
+        return '0 KB';
+    }
+
+    if (value < 1024) {
+        return `${value} B`;
+    }
+
+    if (value < 1024 * 1024) {
+        return `${(value / 1024).toFixed(1)} KB`;
+    }
+
+    return `${(value / (1024 * 1024)).toFixed(1)} MB`;
+}

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { Link, router } from '@inertiajs/vue3';
 import { LogOut, Settings } from 'lucide-vue-next';
+import UserRoleBadge from '@/components/crm/UserRoleBadge.vue';
 import {
     DropdownMenuGroup,
     DropdownMenuItem,
@@ -25,8 +26,17 @@ defineProps<Props>();
 
 <template>
     <DropdownMenuLabel class="p-0 font-normal">
-        <div class="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
-            <UserInfo :user="user" :show-email="true" />
+        <div class="space-y-2 px-1 py-1.5 text-left text-sm">
+            <div class="flex items-center gap-2">
+                <UserInfo :user="user" :show-email="true" />
+            </div>
+            <div class="pl-10">
+                <UserRoleBadge
+                    :role="user.role"
+                    :label="user.role_label"
+                    :show-prefix="true"
+                />
+            </div>
         </div>
     </DropdownMenuLabel>
     <DropdownMenuSeparator />

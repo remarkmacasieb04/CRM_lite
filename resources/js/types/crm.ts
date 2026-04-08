@@ -7,6 +7,32 @@ export type ClientListFilters = {
     search: string | null;
     status: string | null;
     archived: string | null;
+    tag: string | null;
+    follow_up: string | null;
+    stale: string | null;
+};
+
+export type ClientTag = {
+    id: number;
+    name: string;
+    slug: string;
+};
+
+export type SavedClientView = {
+    id: number;
+    name: string;
+    href: string;
+    is_active: boolean;
+    filters: Partial<ClientListFilters>;
+};
+
+export type SmartClientView = {
+    key: string;
+    name: string;
+    description: string;
+    count: number;
+    href: string;
+    is_active: boolean;
 };
 
 export type ClientListItem = {
@@ -24,6 +50,7 @@ export type ClientListItem = {
     archived_at: string | null;
     notes_count: number;
     updated_at: string | null;
+    tags: ClientTag[];
 };
 
 export type ClientNote = {
@@ -51,10 +78,19 @@ export type ClientActivityEntry = {
     properties: Record<string, unknown>;
 };
 
+export type ClientAttachment = {
+    id: number;
+    original_name: string;
+    mime_type: string | null;
+    size: number;
+    created_at: string | null;
+};
+
 export type ClientDetail = Omit<ClientListItem, 'notes_count'> & {
     created_at: string | null;
     notes: ClientNote[];
     activities: ClientActivityEntry[];
+    attachments: ClientAttachment[];
 };
 
 export type PaginationLink = {

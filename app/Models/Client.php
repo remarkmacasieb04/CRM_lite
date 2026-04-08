@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 #[Fillable([
@@ -53,6 +54,16 @@ class Client extends Model
     public function activities(): HasMany
     {
         return $this->hasMany(ClientActivity::class);
+    }
+
+    public function attachments(): HasMany
+    {
+        return $this->hasMany(ClientAttachment::class);
+    }
+
+    public function tags(): BelongsToMany
+    {
+        return $this->belongsToMany(Tag::class)->withTimestamps();
     }
 
     public function isArchived(): bool
@@ -105,5 +116,48 @@ class Client extends Model
     public function scopeRecentFirst(Builder $query): void
     {
         $query->orderByDesc('updated_at');
+    }
+
+    public function scopeWithTagSlug(Builder $query, User $user, ?string $tagSlug): void
+    {
+        if (blank($tagSlug)) {
+            return;
+        }
+
+        $query->whereHas('tags', function (Builder $tagQuery) use ($user, $tagSlug): void {
+            $tagQuery
+                ->whereBelongsTo($user)
+                ->where('slug', $tagSlug);
+        });
+    }
+
+    public function scopeWithFollowUpFilter(Builder $query, ?string $followUp): void
+    {
+        if ($followUp === 'overdue') {
+            $query
+                ->whereNotNull('follow_up_at')
+                ->where('follow_up_at', '<', now()->startOfDay());
+
+            return;
+        }
+
+        if ($followUp === 'week') {
+            $query
+                ->whereNotNull('follow_up_at')
+                ->whereBetween('follow_up_at', [now()->startOfDay(), now()->addDays(7)->endOfDay()]);
+        }
+    }
+
+    public function scopeWithStaleContactFilter(Builder $query, ?string $stale): void
+    {
+        if ($stale !== 'yes') {
+            return;
+        }
+
+        $query->where(function (Builder $staleQuery): void {
+            $staleQuery
+                ->whereNull('last_contacted_at')
+                ->orWhere('last_contacted_at', '<', now()->subDays(14)->startOfDay());
+        });
     }
 }

@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Spinner } from '@/components/ui/spinner';
-import type { ClientDetail, ClientStatusOption } from '@/types';
+import type { ClientDetail, ClientStatusOption, ClientTag } from '@/types';
 
 type ClientFormAction = {
     url: string;
@@ -17,6 +17,7 @@ const props = defineProps<{
     cancelHref: string;
     client?: Partial<ClientDetail>;
     statusOptions: ClientStatusOption[];
+    availableTags: ClientTag[];
     submitLabel: string;
 }>();
 
@@ -30,6 +31,7 @@ const form = useForm({
     source: props.client?.source ?? '',
     last_contacted_at: props.client?.last_contacted_at ?? '',
     follow_up_at: props.client?.follow_up_at ?? '',
+    tags: props.client?.tags?.map((tag) => tag.name).join(', ') ?? '',
 });
 
 const submit = () => {
@@ -144,6 +146,30 @@ const submit = () => {
                     class="h-11"
                 />
                 <InputError :message="form.errors.follow_up_at" />
+            </div>
+
+            <div class="grid gap-2 md:col-span-2">
+                <Label for="tags">Tags</Label>
+                <Input
+                    id="tags"
+                    v-model="form.tags"
+                    list="client-tag-options"
+                    class="h-11"
+                    placeholder="Referral, Retainer, High value"
+                />
+                <datalist id="client-tag-options">
+                    <option
+                        v-for="tag in availableTags"
+                        :key="tag.id"
+                        :value="tag.name"
+                    />
+                </datalist>
+                <p class="text-sm text-slate-500 dark:text-slate-400">
+                    Separate tags with commas so you can build flexible filters
+                    like <strong>Referral</strong> or
+                    <strong>Urgent</strong>.
+                </p>
+                <InputError :message="form.errors.tags" />
             </div>
         </section>
 

@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { Link } from '@inertiajs/vue3';
-import { LayoutGrid, Settings, UsersRound } from 'lucide-vue-next';
+import { Link, usePage } from '@inertiajs/vue3';
+import { LayoutGrid, Settings, ShieldCheck, UsersRound } from 'lucide-vue-next';
+import { computed } from 'vue';
 import AppLogo from '@/components/AppLogo.vue';
 import NavMain from '@/components/NavMain.vue';
 import NavUser from '@/components/NavUser.vue';
@@ -14,27 +15,44 @@ import {
     SidebarMenuItem,
 } from '@/components/ui/sidebar';
 import { dashboard } from '@/routes';
+import admin from '@/routes/admin';
 import { index as clientsIndex } from '@/routes/clients';
 import { edit as editProfile } from '@/routes/profile';
-import type { NavItem } from '@/types';
+import type { NavItem, User } from '@/types';
 
-const mainNavItems: NavItem[] = [
-    {
-        title: 'Dashboard',
-        href: dashboard(),
-        icon: LayoutGrid,
-    },
-    {
-        title: 'Clients',
-        href: clientsIndex(),
-        icon: UsersRound,
-    },
-    {
+const page = usePage();
+
+const mainNavItems = computed<NavItem[]>(() => {
+    const items: NavItem[] = [
+        {
+            title: 'Dashboard',
+            href: dashboard(),
+            icon: LayoutGrid,
+        },
+        {
+            title: 'Clients',
+            href: clientsIndex(),
+            icon: UsersRound,
+        },
+    ];
+    const user = page.props.auth.user as User | null;
+
+    if (user?.can_access_admin) {
+        items.push({
+            title: 'Admin',
+            href: admin.users.index(),
+            icon: ShieldCheck,
+        });
+    }
+
+    items.push({
         title: 'Account',
         href: editProfile(),
         icon: Settings,
-    },
-];
+    });
+
+    return items;
+});
 </script>
 
 <template>

@@ -3,16 +3,20 @@ import { Head, Link, router, useForm } from '@inertiajs/vue3';
 import { watchDebounced } from '@vueuse/core';
 import {
     Archive,
+    BookmarkPlus,
     CalendarClock,
+    Clock3,
     Download,
     FileUp,
     FilterX,
     Search,
     SquarePen,
+    Tag,
     UserPlus2,
     UsersRound,
+    X,
 } from 'lucide-vue-next';
-import { reactive, ref } from 'vue';
+import { computed, reactive, ref } from 'vue';
 import EmptyState from '@/components/crm/EmptyState.vue';
 import PageHeader from '@/components/crm/PageHeader.vue';
 import PaginationLinks from '@/components/crm/PaginationLinks.vue';
@@ -41,17 +45,24 @@ import {
     index,
     show as showClient,
 } from '@/routes/clients';
+import savedViewRoutes from '@/routes/clients/saved-views';
 import type {
     ClientListFilters,
     ClientListItem,
     ClientStatusOption,
+    ClientTag,
     Paginated,
+    SavedClientView,
+    SmartClientView,
 } from '@/types';
 
 const props = defineProps<{
     clients: Paginated<ClientListItem>;
     filters: ClientListFilters;
     statusOptions: ClientStatusOption[];
+    tagOptions: ClientTag[];
+    savedViews: SavedClientView[];
+    smartViews: SmartClientView[];
 }>();
 
 defineOptions({
@@ -69,12 +80,19 @@ const filters = reactive({
     search: props.filters.search ?? '',
     status: props.filters.status ?? '',
     archived: props.filters.archived ?? '',
+    tag: props.filters.tag ?? '',
+    follow_up: props.filters.follow_up ?? '',
+    stale: props.filters.stale ?? '',
 });
 const importDialogOpen = ref(false);
+const saveViewDialogOpen = ref(false);
 const importForm = useForm<{
     file: File | null;
 }>({
     file: null,
+});
+const saveViewForm = useForm({
+    name: '',
 });
 
 const submitFilters = () => {
@@ -82,6 +100,9 @@ const submitFilters = () => {
         search: filters.search || undefined,
         status: filters.status || undefined,
         archived: filters.archived || undefined,
+        tag: filters.tag || undefined,
+        follow_up: filters.follow_up || undefined,
+        stale: filters.stale || undefined,
     };
 
     router.get(
@@ -96,7 +117,14 @@ const submitFilters = () => {
 };
 
 watchDebounced(
-    () => [filters.search, filters.status, filters.archived],
+    () => [
+        filters.search,
+        filters.status,
+        filters.archived,
+        filters.tag,
+        filters.follow_up,
+        filters.stale,
+    ],
     submitFilters,
     {
         debounce: 250,
@@ -108,6 +136,9 @@ const clearFilters = () => {
     filters.search = '';
     filters.status = '';
     filters.archived = '';
+    filters.tag = '';
+    filters.follow_up = '';
+    filters.stale = '';
     submitFilters();
 };
 
@@ -117,8 +148,43 @@ const exportUrl = () =>
             search: filters.search || undefined,
             status: filters.status || undefined,
             archived: filters.archived || undefined,
+            tag: filters.tag || undefined,
+            follow_up: filters.follow_up || undefined,
+            stale: filters.stale || undefined,
         },
     });
+
+const hasActiveFilters = computed(() =>
+    Boolean(
+        filters.search ||
+            filters.status ||
+            filters.archived ||
+            filters.tag ||
+            filters.follow_up ||
+            filters.stale,
+    ),
+);
+
+const saveCurrentView = () => {
+    saveViewForm
+        .transform(() => ({
+            name: saveViewForm.name,
+            search: filters.search || undefined,
+            status: filters.status || undefined,
+            archived: filters.archived || undefined,
+            tag: filters.tag || undefined,
+            follow_up: filters.follow_up || undefined,
+            stale: filters.stale || undefined,
+        }))
+        .post(savedViewRoutes.store.url(), {
+            preserveScroll: true,
+            onSuccess: () => {
+                saveViewDialogOpen.value = false;
+                saveViewForm.reset();
+                saveViewForm.clearErrors();
+            },
+        });
+};
 
 const submitImport = () => {
     importForm.post(importClients.url(), {
@@ -129,6 +195,16 @@ const submitImport = () => {
             importForm.reset();
             importForm.clearErrors();
         },
+    });
+};
+
+const deleteSavedView = (savedView: SavedClientView) => {
+    if (!window.confirm(`Delete the saved view "${savedView.name}"?`)) {
+        return;
+    }
+
+    router.delete(savedViewRoutes.destroy.url(savedView.id), {
+        preserveScroll: true,
     });
 };
 </script>
@@ -257,8 +333,191 @@ const submitImport = () => {
             </template>
         </PageHeader>
 
+        <div class="grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
+            <section class="crm-panel crm-panel-body space-y-5">
+                <div class="flex items-center justify-between gap-3">
+                    <div>
+                        <p class="text-sm font-medium text-slate-500 dark:text-slate-400">
+                            Smart views
+                        </p>
+                        <h2
+                            class="mt-1 text-lg font-semibold text-slate-950 dark:text-white"
+                        >
+                            Quick ways to focus your pipeline
+                        </h2>
+                    </div>
+                    <Clock3 class="size-5 text-slate-400" />
+                </div>
+
+                <div class="grid gap-3 md:grid-cols-2">
+                    <Link
+                        v-for="view in smartViews"
+                        :key="view.key"
+                        :href="view.href"
+                        class="rounded-[1.4rem] border px-4 py-4 text-left transition"
+                        :class="
+                            view.is_active
+                                ? 'border-emerald-200 bg-emerald-50/80 shadow-sm dark:border-emerald-500/30 dark:bg-emerald-500/10'
+                                : 'border-slate-200/80 bg-white/70 hover:border-slate-300 dark:border-slate-800 dark:bg-slate-950/60 dark:hover:border-slate-700'
+                        "
+                    >
+                        <div class="flex items-start justify-between gap-3">
+                            <div>
+                                <p
+                                    class="font-semibold text-slate-950 dark:text-white"
+                                >
+                                    {{ view.name }}
+                                </p>
+                                <p
+                                    class="mt-1 text-sm leading-6 text-slate-500 dark:text-slate-400"
+                                >
+                                    {{ view.description }}
+                                </p>
+                            </div>
+                            <span
+                                class="rounded-full bg-slate-950 px-3 py-1 text-xs font-semibold text-white dark:bg-white dark:text-slate-950"
+                            >
+                                {{ view.count }}
+                            </span>
+                        </div>
+                    </Link>
+                </div>
+            </section>
+
+            <section class="crm-panel crm-panel-body space-y-5">
+                <div
+                    class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between"
+                >
+                    <div>
+                        <p class="text-sm font-medium text-slate-500 dark:text-slate-400">
+                            Saved views
+                        </p>
+                        <h2
+                            class="mt-1 text-lg font-semibold text-slate-950 dark:text-white"
+                        >
+                            Reuse your favorite filter combinations
+                        </h2>
+                    </div>
+
+                    <Dialog v-model:open="saveViewDialogOpen">
+                        <DialogTrigger as-child>
+                            <Button
+                                variant="outline"
+                                :disabled="!hasActiveFilters"
+                            >
+                                <BookmarkPlus class="size-4" />
+                                Save current view
+                            </Button>
+                        </DialogTrigger>
+                        <DialogContent class="sm:max-w-lg">
+                            <DialogHeader>
+                                <DialogTitle>Save this client view</DialogTitle>
+                                <DialogDescription>
+                                    Give this filter set a name so you can reuse
+                                    it later without rebuilding the search.
+                                </DialogDescription>
+                            </DialogHeader>
+
+                            <form
+                                class="space-y-4"
+                                @submit.prevent="saveCurrentView"
+                            >
+                                <div class="space-y-2">
+                                    <label
+                                        for="saved-view-name"
+                                        class="text-sm font-medium text-slate-700 dark:text-slate-200"
+                                    >
+                                        View name
+                                    </label>
+                                    <Input
+                                        id="saved-view-name"
+                                        v-model="saveViewForm.name"
+                                        class="h-11 rounded-xl"
+                                        placeholder="Referral leads to follow up"
+                                    />
+                                    <p
+                                        v-if="saveViewForm.errors.name"
+                                        class="text-sm text-rose-600 dark:text-rose-300"
+                                    >
+                                        {{ saveViewForm.errors.name }}
+                                    </p>
+                                </div>
+
+                                <DialogFooter class="gap-2">
+                                    <Button
+                                        type="button"
+                                        variant="outline"
+                                        @click="saveViewDialogOpen = false"
+                                    >
+                                        Cancel
+                                    </Button>
+                                    <Button
+                                        type="submit"
+                                        :disabled="
+                                            saveViewForm.processing ||
+                                            !saveViewForm.name
+                                        "
+                                    >
+                                        Save view
+                                    </Button>
+                                </DialogFooter>
+                            </form>
+                        </DialogContent>
+                    </Dialog>
+                </div>
+
+                <div
+                    v-if="savedViews.length > 0"
+                    class="grid gap-3 md:grid-cols-2"
+                >
+                    <div
+                        v-for="savedView in savedViews"
+                        :key="savedView.id"
+                        class="rounded-[1.4rem] border p-4 transition"
+                        :class="
+                            savedView.is_active
+                                ? 'border-sky-200 bg-sky-50/80 dark:border-sky-500/30 dark:bg-sky-500/10'
+                                : 'border-slate-200/80 bg-white/70 dark:border-slate-800 dark:bg-slate-950/60'
+                        "
+                    >
+                        <div class="flex items-start justify-between gap-3">
+                            <Link
+                                :href="savedView.href"
+                                class="font-semibold text-slate-950 hover:text-emerald-600 dark:text-white dark:hover:text-emerald-300"
+                            >
+                                {{ savedView.name }}
+                            </Link>
+                            <button
+                                type="button"
+                                class="rounded-full p-1 text-slate-400 transition hover:bg-slate-100 hover:text-slate-700 dark:hover:bg-slate-800 dark:hover:text-slate-200"
+                                @click="deleteSavedView(savedView)"
+                            >
+                                <X class="size-4" />
+                            </button>
+                        </div>
+                        <p
+                            class="mt-2 text-sm leading-6 text-slate-500 dark:text-slate-400"
+                        >
+                            {{
+                                Object.keys(savedView.filters).length > 0
+                                    ? 'Saved filters ready to reopen with one click.'
+                                    : 'No extra filters attached.'
+                            }}
+                        </p>
+                    </div>
+                </div>
+
+                <EmptyState
+                    v-else
+                    title="No saved views yet"
+                    description="Apply a few filters, then save the combination so your most useful client slices are always one click away."
+                    :icon="BookmarkPlus"
+                />
+            </section>
+        </div>
+
         <section class="crm-panel crm-panel-body">
-            <div class="grid gap-4 lg:grid-cols-[1.3fr_0.7fr_0.45fr_auto]">
+            <div class="grid gap-4 lg:grid-cols-[1.25fr_0.6fr_0.6fr_0.55fr_0.45fr_auto]">
                 <div class="grid gap-2">
                     <label
                         for="search"
@@ -299,6 +558,43 @@ const submitImport = () => {
                         >
                             {{ option.label }}
                         </option>
+                    </select>
+                </div>
+
+                <div class="grid gap-2">
+                    <label
+                        for="tag"
+                        class="text-sm font-medium text-slate-700 dark:text-slate-200"
+                    >
+                        Tag
+                    </label>
+                    <select id="tag" v-model="filters.tag" class="crm-field">
+                        <option value="">All tags</option>
+                        <option
+                            v-for="tag in tagOptions"
+                            :key="tag.id"
+                            :value="tag.slug"
+                        >
+                            {{ tag.name }}
+                        </option>
+                    </select>
+                </div>
+
+                <div class="grid gap-2">
+                    <label
+                        for="follow_up"
+                        class="text-sm font-medium text-slate-700 dark:text-slate-200"
+                    >
+                        Follow-up
+                    </label>
+                    <select
+                        id="follow_up"
+                        v-model="filters.follow_up"
+                        class="crm-field"
+                    >
+                        <option value="">Any timing</option>
+                        <option value="overdue">Overdue</option>
+                        <option value="week">Due this week</option>
                     </select>
                 </div>
 
@@ -349,6 +645,24 @@ const submitImport = () => {
                     </Button>
                 </div>
             </div>
+
+            <label
+                class="mt-4 inline-flex items-center gap-3 text-sm text-slate-600 dark:text-slate-300"
+            >
+                <input
+                    :checked="filters.stale === 'yes'"
+                    type="checkbox"
+                    class="size-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500"
+                    @change="
+                        filters.stale = (
+                            $event.target as HTMLInputElement
+                        ).checked
+                            ? 'yes'
+                            : ''
+                    "
+                />
+                Show stale contacts only
+            </label>
         </section>
 
         <section class="crm-panel overflow-hidden">
@@ -408,6 +722,19 @@ const submitImport = () => {
                                     client.notes_count === 1 ? '' : 's'
                                 }}</span
                             >
+                        </div>
+                        <div
+                            v-if="client.tags.length > 0"
+                            class="mt-3 flex flex-wrap gap-2"
+                        >
+                            <span
+                                v-for="tag in client.tags"
+                                :key="tag.id"
+                                class="inline-flex items-center gap-1 rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-600 dark:bg-slate-800 dark:text-slate-200"
+                            >
+                                <Tag class="size-3" />
+                                {{ tag.name }}
+                            </span>
                         </div>
                     </div>
 
@@ -474,7 +801,7 @@ const submitImport = () => {
                 >
                     <Button
                         v-if="
-                            filters.search || filters.status || filters.archived
+                            hasActiveFilters
                         "
                         variant="outline"
                         @click="clearFilters"

@@ -4,8 +4,12 @@ namespace Tests\Feature\Clients;
 
 use App\Enums\ClientStatus;
 use App\Models\Client;
+use App\Models\ClientAttachment;
+use App\Models\Tag;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 class ClientManagementTest extends TestCase
@@ -28,9 +32,12 @@ class ClientManagementTest extends TestCase
             'source' => 'Referral',
             'last_contacted_at' => '2026-03-20',
             'follow_up_at' => '2026-03-29',
+            'tags' => 'Referral, Design',
         ]);
 
         $client = Client::query()->firstOrFail();
+        $referralTag = Tag::query()->where('slug', 'referral')->firstOrFail();
+        $designTag = Tag::query()->where('slug', 'design')->firstOrFail();
 
         $createResponse->assertRedirect(route('clients.show', $client));
         $this->assertDatabaseHas('clients', [
@@ -44,6 +51,14 @@ class ClientManagementTest extends TestCase
             'client_id' => $client->id,
             'type' => 'created',
             'description' => 'Created this client record.',
+        ]);
+        $this->assertDatabaseHas('client_tag', [
+            'client_id' => $client->id,
+            'tag_id' => $referralTag->id,
+        ]);
+        $this->assertDatabaseHas('client_tag', [
+            'client_id' => $client->id,
+            'tag_id' => $designTag->id,
         ]);
 
         $this->get(route('clients.show', $client))
@@ -60,7 +75,10 @@ class ClientManagementTest extends TestCase
             'source' => 'Website',
             'last_contacted_at' => '2026-03-21',
             'follow_up_at' => '2026-03-30',
+            'tags' => 'Retainer',
         ]);
+
+        $retainerTag = Tag::query()->where('slug', 'retainer')->firstOrFail();
 
         $updateResponse->assertRedirect(route('clients.show', $client));
         $this->assertDatabaseHas('clients', [
@@ -73,6 +91,14 @@ class ClientManagementTest extends TestCase
             'client_id' => $client->id,
             'type' => 'updated',
             'description' => 'Updated client details.',
+        ]);
+        $this->assertDatabaseHas('client_tag', [
+            'client_id' => $client->id,
+            'tag_id' => $retainerTag->id,
+        ]);
+        $this->assertDatabaseMissing('client_tag', [
+            'client_id' => $client->id,
+            'tag_id' => $referralTag->id,
         ]);
 
         $this->patch(route('clients.archive', $client))
@@ -167,6 +193,76 @@ class ClientManagementTest extends TestCase
         ]);
     }
 
+    public function test_user_can_upload_download_and_remove_client_attachments(): void
+    {
+        Storage::fake('local');
+
+        $user = User::factory()->create();
+        $client = Client::factory()->for($user)->create();
+
+        $uploadResponse = $this->actingAs($user)
+            ->from(route('clients.show', $client))
+            ->post(route('clients.attachments.store', $client), [
+                'file' => UploadedFile::fake()->create('proposal.pdf', 120, 'application/pdf'),
+            ]);
+
+        $attachment = ClientAttachment::query()->firstOrFail();
+
+        $uploadResponse->assertRedirect(route('clients.show', $client));
+        Storage::disk('local')->assertExists($attachment->path);
+        $this->assertDatabaseHas('client_activities', [
+            'user_id' => $user->id,
+            'client_id' => $client->id,
+            'type' => 'attachment_added',
+        ]);
+
+        $this->actingAs($user)
+            ->get(route('clients.attachments.download', $attachment))
+            ->assertOk()
+            ->assertDownload('proposal.pdf');
+
+        $path = $attachment->path;
+
+        $this->actingAs($user)
+            ->delete(route('clients.attachments.destroy', $attachment))
+            ->assertRedirect()
+            ->assertSessionHas('success');
+
+        Storage::disk('local')->assertMissing($path);
+        $this->assertDatabaseMissing('client_attachments', [
+            'id' => $attachment->id,
+        ]);
+        $this->assertDatabaseHas('client_activities', [
+            'user_id' => $user->id,
+            'client_id' => $client->id,
+            'type' => 'attachment_deleted',
+        ]);
+    }
+
+    public function test_deleting_an_archived_client_purges_stored_attachments(): void
+    {
+        Storage::fake('local');
+
+        $user = User::factory()->create();
+        $client = Client::factory()->for($user)->archived()->create();
+
+        $this->actingAs($user)->post(route('clients.attachments.store', $client), [
+            'file' => UploadedFile::fake()->create('brief.txt', 10, 'text/plain'),
+        ]);
+
+        $attachment = ClientAttachment::query()->firstOrFail();
+        $path = $attachment->path;
+
+        $this->actingAs($user)
+            ->delete(route('clients.destroy', $client))
+            ->assertRedirect(route('clients.index', ['archived' => 'only']));
+
+        Storage::disk('local')->assertMissing($path);
+        $this->assertDatabaseMissing('client_attachments', [
+            'id' => $attachment->id,
+        ]);
+    }
+
     public function test_users_cannot_access_or_modify_other_users_clients(): void
     {
         $owner = User::factory()->create();
@@ -201,6 +297,29 @@ class ClientManagementTest extends TestCase
 
         $this->actingAs($intruder)
             ->delete(route('clients.destroy', $archivedClient))
+            ->assertForbidden();
+    }
+
+    public function test_users_cannot_download_or_delete_other_users_attachments(): void
+    {
+        Storage::fake('local');
+
+        $owner = User::factory()->create();
+        $intruder = User::factory()->create();
+        $client = Client::factory()->for($owner)->create();
+
+        $this->actingAs($owner)->post(route('clients.attachments.store', $client), [
+            'file' => UploadedFile::fake()->create('scope.pdf', 40, 'application/pdf'),
+        ]);
+
+        $attachment = ClientAttachment::query()->firstOrFail();
+
+        $this->actingAs($intruder)
+            ->get(route('clients.attachments.download', $attachment))
+            ->assertForbidden();
+
+        $this->actingAs($intruder)
+            ->delete(route('clients.attachments.destroy', $attachment))
             ->assertForbidden();
     }
 }

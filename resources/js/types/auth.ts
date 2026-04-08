@@ -11,9 +11,14 @@ export type User = {
     name: string;
     email: string;
     avatar?: string | null;
+    role: string | null;
+    role_label: string | null;
+    can_access_admin: boolean;
     email_verified_at: string | null;
     created_at: string;
     updated_at: string;
+    receives_follow_up_reminders: boolean;
+    last_follow_up_digest_sent_at: string | null;
     connected_providers: ConnectedProvider[];
     [key: string]: unknown;
 };

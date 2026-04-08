@@ -7,6 +7,8 @@ enum ClientActivityType: string
     case Created = 'created';
     case Updated = 'updated';
     case NoteAdded = 'note_added';
+    case AttachmentAdded = 'attachment_added';
+    case AttachmentDeleted = 'attachment_deleted';
     case Imported = 'imported';
     case Contacted = 'contacted';
     case Archived = 'archived';
@@ -19,6 +21,8 @@ enum ClientActivityType: string
             self::Created => 'Client created',
             self::Updated => 'Client updated',
             self::NoteAdded => 'Note added',
+            self::AttachmentAdded => 'Attachment added',
+            self::AttachmentDeleted => 'Attachment removed',
             self::Imported => 'Imported from CSV',
             self::Contacted => 'Marked as contacted',
             self::Archived => 'Client archived',

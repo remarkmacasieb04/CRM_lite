@@ -4,11 +4,14 @@ import {
     Archive,
     BadgeCheck,
     CalendarClock,
+    Download,
     Mail,
     MessageSquareText,
+    Paperclip,
     Phone,
     RotateCcw,
     Trash2,
+    Upload,
 } from 'lucide-vue-next';
 import { computed } from 'vue';
 import EmptyState from '@/components/crm/EmptyState.vue';
@@ -17,6 +20,7 @@ import StatusBadge from '@/components/crm/StatusBadge.vue';
 import InputError from '@/components/InputError.vue';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
 import {
     Dialog,
     DialogClose,
@@ -32,6 +36,7 @@ import {
     formatCurrency,
     formatDate,
     formatDateTime,
+    formatFileSize,
     formatRelativeTime,
 } from '@/lib/formatters';
 import {
@@ -42,6 +47,7 @@ import {
     index,
     restore,
 } from '@/routes/clients';
+import attachments from '@/routes/clients/attachments';
 import notes from '@/routes/clients/notes';
 import type { ClientDetail } from '@/types';
 
@@ -67,11 +73,17 @@ defineOptions({
 const noteForm = useForm({
     content: '',
 });
+const attachmentForm = useForm<{
+    file: File | null;
+}>({
+    file: null,
+});
 
 const archiveForm = useForm({});
 const restoreForm = useForm({});
 const deleteForm = useForm({});
 const contactForm = useForm({});
+const attachmentDeleteForm = useForm({});
 
 const isArchived = computed(() => props.client.archived_at !== null);
 
@@ -79,6 +91,17 @@ const submitNote = () => {
     noteForm.post(notes.store.url(props.client.id), {
         preserveScroll: true,
         onSuccess: () => noteForm.reset(),
+    });
+};
+
+const submitAttachment = () => {
+    attachmentForm.post(attachments.store.url(props.client.id), {
+        forceFormData: true,
+        preserveScroll: true,
+        onSuccess: () => {
+            attachmentForm.reset();
+            attachmentForm.clearErrors();
+        },
     });
 };
 
@@ -105,6 +128,16 @@ const markClientContacted = () => {
         preserveScroll: true,
     });
 };
+
+const deleteAttachment = (attachmentId: number, originalName: string) => {
+    if (!window.confirm(`Remove ${originalName} from this client?`)) {
+        return;
+    }
+
+    attachmentDeleteForm.delete(attachments.destroy.url(attachmentId), {
+        preserveScroll: true,
+    });
+};
 </script>
 
 <template>
@@ -122,6 +155,18 @@ const markClientContacted = () => {
                         :label="client.status_label"
                         :archived-at="client.archived_at"
                     />
+                    <div
+                        v-if="client.tags.length > 0"
+                        class="flex flex-wrap items-center gap-2"
+                    >
+                        <span
+                            v-for="tag in client.tags"
+                            :key="tag.id"
+                            class="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-700 dark:bg-slate-800 dark:text-slate-200"
+                        >
+                            {{ tag.name }}
+                        </span>
+                    </div>
                     <span class="text-sm text-slate-500 dark:text-slate-400">
                         Updated {{ formatRelativeTime(client.updated_at) }}
                     </span>
@@ -256,13 +301,29 @@ const markClientContacted = () => {
                             <p
                                 class="text-sm font-medium text-slate-500 dark:text-slate-400"
                             >
+                                Tags
+                            </p>
+                            <p class="mt-2 text-lg font-semibold">
+                                {{
+                                    client.tags.length > 0
+                                        ? client.tags
+                                              .map((tag) => tag.name)
+                                              .join(', ')
+                                        : 'Not tagged'
+                                }}
+                            </p>
+                        </div>
+                        <div class="crm-subtle-panel">
+                            <p
+                                class="text-sm font-medium text-slate-500 dark:text-slate-400"
+                            >
                                 Last contacted
                             </p>
                             <p class="mt-2 text-lg font-semibold">
                                 {{ formatDate(client.last_contacted_at) }}
                             </p>
                         </div>
-                        <div class="crm-subtle-panel">
+                        <div class="crm-subtle-panel md:col-span-2">
                             <p
                                 class="text-sm font-medium text-slate-500 dark:text-slate-400"
                             >
@@ -346,6 +407,147 @@ const markClientContacted = () => {
             </div>
 
             <div class="space-y-6">
+                <Card>
+                    <CardHeader>
+                        <CardTitle class="text-xl">Attachments</CardTitle>
+                    </CardHeader>
+                    <CardContent class="space-y-5">
+                        <form
+                            class="crm-subtle-panel space-y-3"
+                            @submit.prevent="submitAttachment"
+                        >
+                            <label
+                                for="attachment-file"
+                                class="text-sm font-medium text-slate-700 dark:text-slate-200"
+                            >
+                                Upload a file
+                            </label>
+                            <Input
+                                id="attachment-file"
+                                type="file"
+                                accept=".pdf,.png,.jpg,.jpeg,.doc,.docx,.txt,.csv"
+                                class="h-11 rounded-xl"
+                                @input="
+                                    attachmentForm.file =
+                                        ($event.target as HTMLInputElement)
+                                            .files?.[0] ?? null
+                                "
+                            />
+                            <p
+                                class="text-sm text-slate-500 dark:text-slate-400"
+                            >
+                                Great for proposals, contracts, screenshots, or
+                                briefs. Files are stored privately and download
+                                through the app.
+                            </p>
+                            <InputError
+                                :message="attachmentForm.errors.file"
+                            />
+                            <Button
+                                type="submit"
+                                :disabled="
+                                    attachmentForm.processing ||
+                                    !attachmentForm.file
+                                "
+                            >
+                                <Upload class="size-4" />
+                                Upload attachment
+                            </Button>
+                        </form>
+
+                        <div v-if="client.attachments.length > 0" class="space-y-3">
+                            <div
+                                v-for="attachment in client.attachments"
+                                :key="attachment.id"
+                                class="crm-list-item"
+                            >
+                                <div
+                                    class="flex flex-col gap-4 md:flex-row md:items-start md:justify-between"
+                                >
+                                    <div class="flex items-start gap-3">
+                                        <div
+                                            class="rounded-2xl bg-slate-100 p-3 text-slate-700 dark:bg-slate-800 dark:text-slate-200"
+                                        >
+                                            <Paperclip class="size-5" />
+                                        </div>
+                                        <div class="space-y-1">
+                                            <p
+                                                class="font-semibold text-slate-950 dark:text-white"
+                                            >
+                                                {{
+                                                    attachment.original_name
+                                                }}
+                                            </p>
+                                            <div
+                                                class="flex flex-wrap gap-3 text-sm text-slate-500 dark:text-slate-400"
+                                            >
+                                                <span>{{
+                                                    attachment.mime_type ||
+                                                    'Unknown type'
+                                                }}</span>
+                                                <span>{{
+                                                    formatFileSize(
+                                                        attachment.size,
+                                                    )
+                                                }}</span>
+                                                <span>{{
+                                                    formatDateTime(
+                                                        attachment.created_at,
+                                                    )
+                                                }}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div
+                                        class="flex flex-wrap items-center gap-2"
+                                    >
+                                        <Button
+                                            variant="outline"
+                                            size="sm"
+                                            as-child
+                                        >
+                                            <a
+                                                :href="
+                                                    attachments.download.url(
+                                                        attachment.id,
+                                                    )
+                                                "
+                                            >
+                                                <Download class="size-4" />
+                                                Download
+                                            </a>
+                                        </Button>
+                                        <Button
+                                            variant="outline"
+                                            size="sm"
+                                            :disabled="
+                                                attachmentDeleteForm.processing
+                                            "
+                                            @click="
+                                                deleteAttachment(
+                                                    attachment.id,
+                                                    attachment.original_name,
+                                                )
+                                            "
+                                        >
+                                            <Trash2 class="size-4" />
+                                            Remove
+                                        </Button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <EmptyState
+                            v-else
+                            title="No attachments yet"
+                            description="Upload proposal PDFs, signed agreements, or other client files so everything stays attached to the relationship."
+                            :icon="Paperclip"
+                        />
+                    </CardContent>
+                </Card>
+
                 <Card>
                     <CardHeader>
                         <CardTitle class="text-xl">Contact info</CardTitle>

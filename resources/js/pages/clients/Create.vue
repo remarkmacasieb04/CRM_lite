@@ -3,10 +3,11 @@ import { Head } from '@inertiajs/vue3';
 import ClientForm from '@/components/crm/ClientForm.vue';
 import PageHeader from '@/components/crm/PageHeader.vue';
 import { create, index, store } from '@/routes/clients';
-import type { ClientStatusOption } from '@/types';
+import type { ClientStatusOption, ClientTag } from '@/types';
 
 defineProps<{
     statusOptions: ClientStatusOption[];
+    availableTags: ClientTag[];
 }>();
 
 defineOptions({
@@ -40,6 +41,7 @@ defineOptions({
                 :action="{ url: store.url(), method: 'post' }"
                 :cancel-href="index.url()"
                 :status-options="statusOptions"
+                :available-tags="availableTags"
                 submit-label="Create client"
             />
         </section>

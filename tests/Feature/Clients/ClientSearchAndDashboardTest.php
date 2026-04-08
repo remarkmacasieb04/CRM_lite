@@ -7,6 +7,8 @@ use App\Enums\ClientStatus;
 use App\Models\Client;
 use App\Models\ClientActivity;
 use App\Models\ClientNote;
+use App\Models\SavedClientView;
+use App\Models\Tag;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
@@ -95,6 +97,88 @@ class ClientSearchAndDashboardTest extends TestCase
             ->component('clients/Index')
             ->has('clients.data', 1)
             ->where('clients.data.0.name', 'Archived Client'));
+    }
+
+    public function test_clients_can_be_filtered_by_tag_follow_up_and_stale_contact(): void
+    {
+        $user = User::factory()->create();
+        $this->actingAs($user);
+
+        $priorityTag = Tag::query()->create([
+            'user_id' => $user->id,
+            'name' => 'Priority',
+            'slug' => 'priority',
+        ]);
+
+        $match = Client::factory()->for($user)->create([
+            'name' => 'Priority Client',
+            'status' => ClientStatus::Lead,
+            'follow_up_at' => now()->subDay(),
+            'last_contacted_at' => now()->subDays(20),
+        ]);
+        $match->tags()->attach($priorityTag);
+
+        $futureClient = Client::factory()->for($user)->create([
+            'name' => 'Future Client',
+            'follow_up_at' => now()->addDays(3),
+            'last_contacted_at' => now()->subDays(2),
+        ]);
+        $futureClient->tags()->attach($priorityTag);
+
+        Client::factory()->for($user)->create([
+            'name' => 'Fresh Client',
+            'follow_up_at' => now()->subDay(),
+            'last_contacted_at' => now()->subDays(3),
+        ]);
+
+        $response = $this->get(route('clients.index', [
+            'tag' => 'priority',
+            'follow_up' => 'overdue',
+            'stale' => 'yes',
+        ]));
+
+        $response->assertInertia(fn (AssertableInertia $page) => $page
+            ->component('clients/Index')
+            ->has('clients.data', 1)
+            ->where('clients.data.0.name', 'Priority Client'));
+    }
+
+    public function test_filtered_client_views_can_be_saved_and_deleted(): void
+    {
+        $user = User::factory()->create();
+
+        $storeResponse = $this->actingAs($user)
+            ->from(route('clients.index'))
+            ->post(route('clients.saved-views.store'), [
+                'name' => 'Priority leads',
+                'status' => ClientStatus::Lead->value,
+                'follow_up' => 'week',
+            ]);
+
+        $savedView = SavedClientView::query()->firstOrFail();
+
+        $storeResponse->assertRedirect(route('clients.index'));
+        $this->assertDatabaseHas('saved_client_views', [
+            'id' => $savedView->id,
+            'user_id' => $user->id,
+            'name' => 'Priority leads',
+        ]);
+
+        $this->actingAs($user)
+            ->get(route('clients.index'))
+            ->assertInertia(fn (AssertableInertia $page) => $page
+                ->component('clients/Index')
+                ->has('savedViews', 1)
+                ->where('savedViews.0.name', 'Priority leads'));
+
+        $this->actingAs($user)
+            ->delete(route('clients.saved-views.destroy', $savedView))
+            ->assertRedirect()
+            ->assertSessionHas('success');
+
+        $this->assertDatabaseMissing('saved_client_views', [
+            'id' => $savedView->id,
+        ]);
     }
 
     public function test_clients_export_respects_filters_and_ownership(): void

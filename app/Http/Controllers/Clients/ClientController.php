@@ -12,7 +12,10 @@ use App\Http\Requests\Clients\UpdateClientRequest;
 use App\Models\Client;
 use App\Models\User;
 use App\Services\Clients\ClientActivityLogger;
+use App\Services\Clients\ClientAttachmentStorage;
 use App\Services\Clients\ClientImportService;
+use App\Services\Clients\ClientTagSyncService;
+use App\Support\ClientFilters;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -25,8 +28,10 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 class ClientController extends Controller
 {
     public function __construct(
+        private readonly ClientAttachmentStorage $clientAttachmentStorage,
         private readonly ClientActivityLogger $clientActivityLogger,
         private readonly ClientImportService $clientImportService,
+        private readonly ClientTagSyncService $clientTagSyncService,
     ) {}
 
     public function index(ClientIndexRequest $request): Response
@@ -37,6 +42,7 @@ class ClientController extends Controller
         $user = $request->user();
 
         $clients = $this->filteredClientsQuery($user, $filters)
+            ->with('tags:id,name,slug')
             ->withCount('notes')
             ->recentFirst()
             ->paginate(10)
@@ -56,16 +62,20 @@ class ClientController extends Controller
                 'archived_at' => $client->archived_at?->toIso8601String(),
                 'notes_count' => $client->notes_count,
                 'updated_at' => $client->updated_at?->toIso8601String(),
+                'tags' => $client->tags->map(fn ($tag): array => [
+                    'id' => $tag->id,
+                    'name' => $tag->name,
+                    'slug' => $tag->slug,
+                ])->all(),
             ]);
 
         return Inertia::render('clients/Index', [
             'clients' => $clients,
-            'filters' => [
-                'search' => $filters['search'] ?? null,
-                'status' => $filters['status'] ?? null,
-                'archived' => $filters['archived'] ?? null,
-            ],
+            'filters' => $this->clientListFilters($filters),
             'statusOptions' => ClientStatus::options(),
+            'tagOptions' => $this->availableTags($user),
+            'savedViews' => $this->savedViews($user, $filters),
+            'smartViews' => $this->smartViews($user, $filters),
         ]);
     }
 
@@ -145,13 +155,24 @@ class ClientController extends Controller
 
         return Inertia::render('clients/Create', [
             'statusOptions' => ClientStatus::options(),
+            'availableTags' => $this->availableTags(request()->user()),
         ]);
     }
 
     public function store(StoreClientRequest $request): RedirectResponse
     {
         $client = DB::transaction(function () use ($request): Client {
-            $client = $request->user()->clients()->create($request->validated());
+            $attributes = collect($request->validated())
+                ->except('tags')
+                ->all();
+
+            $client = $request->user()->clients()->create($attributes);
+
+            $this->clientTagSyncService->sync(
+                $request->user(),
+                $client,
+                $request->validated('tags'),
+            );
 
             $this->clientActivityLogger->record(
                 $request->user(),
@@ -192,6 +213,7 @@ class ClientController extends Controller
         $this->authorize('view', $client);
 
         $client->load([
+            'tags' => fn ($query) => $query->orderBy('name'),
             'notes' => fn ($query) => $query
                 ->with('user:id,name,email')
                 ->latest(),
@@ -199,6 +221,8 @@ class ClientController extends Controller
                 ->with('user:id,name,email')
                 ->latest()
                 ->limit(10),
+            'attachments' => fn ($query) => $query
+                ->latest(),
         ]);
 
         return Inertia::render('clients/Show', [
@@ -211,18 +235,51 @@ class ClientController extends Controller
     {
         $this->authorize('update', $client);
 
+        $client->loadMissing([
+            'tags' => fn ($query) => $query->orderBy('name'),
+        ]);
+
         return Inertia::render('clients/Edit', [
             'client' => $this->clientPayload($client),
             'statusOptions' => ClientStatus::options(),
+            'availableTags' => $this->availableTags(request()->user()),
         ]);
     }
 
     public function update(UpdateClientRequest $request, Client $client): RedirectResponse
     {
         $client = DB::transaction(function () use ($request, $client): Client {
-            $client->fill($request->validated());
+            $attributes = collect($request->validated())
+                ->except('tags')
+                ->all();
+            $originalTags = $client->tags()
+                ->orderBy('name')
+                ->pluck('name')
+                ->values()
+                ->all();
+
+            $client->fill($attributes);
             $changedFields = array_keys($client->getDirty());
-            $client->save();
+
+            if ($changedFields !== []) {
+                $client->save();
+            }
+
+            $this->clientTagSyncService->sync(
+                $request->user(),
+                $client,
+                $request->validated('tags'),
+            );
+
+            $updatedTags = $client->tags()
+                ->orderBy('name')
+                ->pluck('name')
+                ->values()
+                ->all();
+
+            if ($originalTags !== $updatedTags) {
+                $changedFields[] = 'tags';
+            }
 
             if ($changedFields !== []) {
                 $this->clientActivityLogger->record(
@@ -285,6 +342,8 @@ class ClientController extends Controller
         $this->authorize('delete', $client);
 
         DB::transaction(function () use ($request, $client): void {
+            $this->clientAttachmentStorage->purgeForClient($client);
+
             $this->clientActivityLogger->record(
                 $request->user(),
                 $client,
@@ -320,7 +379,15 @@ class ClientController extends Controller
     }
 
     /**
-     * @param  array{search?: ?string, status?: ?string, archived?: ?string, page?: ?int}  $filters
+     * @param  array{
+     *     search?: ?string,
+     *     status?: ?string,
+     *     archived?: ?string,
+     *     tag?: ?string,
+     *     follow_up?: ?string,
+     *     stale?: ?string,
+     *     page?: ?int
+     * }  $filters
      */
     private function filteredClientsQuery(User $user, array $filters): Builder
     {
@@ -328,6 +395,9 @@ class ClientController extends Controller
             ->ownedBy($user)
             ->search($filters['search'] ?? null)
             ->withStatus($filters['status'] ?? null)
+            ->withTagSlug($user, $filters['tag'] ?? null)
+            ->withFollowUpFilter($filters['follow_up'] ?? null)
+            ->withStaleContactFilter($filters['stale'] ?? null)
             ->withArchivedFilter($filters['archived'] ?? null);
     }
 
@@ -355,6 +425,13 @@ class ClientController extends Controller
             'archived_at' => $client->archived_at?->toIso8601String(),
             'created_at' => $client->created_at?->toIso8601String(),
             'updated_at' => $client->updated_at?->toIso8601String(),
+            'tags' => $client->relationLoaded('tags')
+                ? $client->tags->map(fn ($tag): array => [
+                    'id' => $tag->id,
+                    'name' => $tag->name,
+                    'slug' => $tag->slug,
+                ])->all()
+                : [],
             'notes' => $client->relationLoaded('notes')
                 ? $client->notes->map(fn ($note): array => [
                     'id' => $note->id,
@@ -382,6 +459,113 @@ class ClientController extends Controller
                     'properties' => $activity->properties ?? [],
                 ])->all()
                 : [],
+            'attachments' => $client->relationLoaded('attachments')
+                ? $client->attachments->map(fn ($attachment): array => [
+                    'id' => $attachment->id,
+                    'original_name' => $attachment->original_name,
+                    'mime_type' => $attachment->mime_type,
+                    'size' => $attachment->size,
+                    'created_at' => $attachment->created_at?->toIso8601String(),
+                ])->all()
+                : [],
         ];
+    }
+
+    /**
+     * @param  array<string, mixed>  $filters
+     * @return array<string, mixed>
+     */
+    private function clientListFilters(array $filters): array
+    {
+        return [
+            'search' => $filters['search'] ?? null,
+            'status' => $filters['status'] ?? null,
+            'archived' => $filters['archived'] ?? null,
+            'tag' => $filters['tag'] ?? null,
+            'follow_up' => $filters['follow_up'] ?? null,
+            'stale' => $filters['stale'] ?? null,
+        ];
+    }
+
+    /**
+     * @return array<int, array{id: int, name: string, slug: string}>
+     */
+    private function availableTags(User $user): array
+    {
+        return $user->tags()
+            ->orderBy('name')
+            ->get(['id', 'name', 'slug'])
+            ->map(fn ($tag): array => [
+                'id' => $tag->id,
+                'name' => $tag->name,
+                'slug' => $tag->slug,
+            ])
+            ->all();
+    }
+
+    /**
+     * @param  array<string, mixed>  $currentFilters
+     * @return array<int, array<string, mixed>>
+     */
+    private function savedViews(User $user, array $currentFilters): array
+    {
+        return $user->savedClientViews()
+            ->latest()
+            ->get()
+            ->map(fn ($savedView): array => [
+                'id' => $savedView->id,
+                'name' => $savedView->name,
+                'filters' => $savedView->filters ?? [],
+                'href' => route('clients.index', $savedView->filters ?? []),
+                'is_active' => ClientFilters::matches($currentFilters, $savedView->filters ?? []),
+            ])->all();
+    }
+
+    /**
+     * @param  array<string, mixed>  $currentFilters
+     * @return array<int, array<string, mixed>>
+     */
+    private function smartViews(User $user, array $currentFilters): array
+    {
+        $baseQuery = Client::query()
+            ->ownedBy($user)
+            ->withArchivedFilter(null);
+
+        $views = [
+            [
+                'key' => 'overdue',
+                'name' => 'Overdue follow-ups',
+                'description' => 'Clients whose follow-up date has already passed.',
+                'filters' => ['follow_up' => 'overdue'],
+                'count' => (clone $baseQuery)->withFollowUpFilter('overdue')->count(),
+            ],
+            [
+                'key' => 'due_this_week',
+                'name' => 'Due this week',
+                'description' => 'Upcoming follow-ups scheduled in the next seven days.',
+                'filters' => ['follow_up' => 'week'],
+                'count' => (clone $baseQuery)->withFollowUpFilter('week')->count(),
+            ],
+            [
+                'key' => 'stale',
+                'name' => 'Stale contacts',
+                'description' => 'Clients you have not contacted in at least two weeks.',
+                'filters' => ['stale' => 'yes'],
+                'count' => (clone $baseQuery)->withStaleContactFilter('yes')->count(),
+            ],
+            [
+                'key' => 'leads',
+                'name' => 'Lead pipeline',
+                'description' => 'Lead records that still need nurturing.',
+                'filters' => ['status' => ClientStatus::Lead->value],
+                'count' => (clone $baseQuery)->withStatus(ClientStatus::Lead)->count(),
+            ],
+        ];
+
+        return array_map(fn (array $view): array => [
+            ...$view,
+            'href' => route('clients.index', $view['filters']),
+            'is_active' => ClientFilters::matches($currentFilters, $view['filters']),
+        ], $views);
     }
 }

@@ -25,6 +25,7 @@ class ClientData
             'source' => self::normalizeString($input['source'] ?? null),
             'last_contacted_at' => self::normalizeString($input['last_contacted_at'] ?? null),
             'follow_up_at' => self::normalizeString($input['follow_up_at'] ?? null),
+            'tags' => self::normalizeString($input['tags'] ?? null),
         ];
     }
 
@@ -43,6 +44,7 @@ class ClientData
             'source' => ['nullable', 'string', 'max:120'],
             'last_contacted_at' => ['nullable', 'date'],
             'follow_up_at' => ['nullable', 'date'],
+            'tags' => ['nullable', 'string', 'max:255'],
         ];
     }
 

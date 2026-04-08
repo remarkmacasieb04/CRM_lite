@@ -1,6 +1,6 @@
 # CRM Lite
 
-CRM Lite is a Laravel 13 + Vue 3 + Inertia.js CRM for freelancers and small service businesses. It ships with custom Fortify-based authentication, optional Socialite login, a polished SaaS-style dashboard, client management, searchable records, client notes, archive workflows, and production-safe defaults.
+CRM Lite is a Laravel 13 + Vue 3 + Inertia.js CRM for freelancers and small service businesses. It ships with custom Fortify-based authentication, optional Socialite login, a polished SaaS-style dashboard, client management, searchable records, client notes, archive workflows, reminder tooling, and production-safe defaults.
 
 ## Stack
 
@@ -19,10 +19,14 @@ CRM Lite is a Laravel 13 + Vue 3 + Inertia.js CRM for freelancers and small serv
 - Optional social login with Google, Facebook, and GitHub
 - Dashboard stats for total clients, active clients, leads, due follow-ups, recent clients, and recent notes
 - Follow-up reminder panels for overdue and upcoming clients
+- Daily reminder email preferences plus CLI reminder commands for local development
 - Client create, edit, show, archive, restore, and permanent delete after archive
+- Admin/user roles with a simple admin workspace screen
 - CSV export with current filters applied
 - CSV import with validation and safe email-based updates
 - Client notes timeline
+- Private client attachments with upload, download, and cleanup on delete
+- Client tags, smart views, and saved views for repeat filtering
 - Client activity timeline and dashboard activity feed
 - Quick contact actions for email, phone, and marking a client as contacted
 - Search by name, company, email, and phone
@@ -101,6 +105,36 @@ GITHUB_REDIRECT_URI="${APP_URL}/auth/github/callback"
 
 If a provider is missing credentials, CRM Lite hides that button and fails gracefully if its callback is hit directly.
 
+## Demo Accounts
+
+If you run the local sample seeder, CRM Lite creates these accounts:
+
+- `owner@example.com` / `password`
+  Role: `admin`
+  Use case: primary administrator with the largest demo dataset, useful for testing the dashboard, admin panel, imports, exports, reminders, and social login linking.
+- `admin@example.com` / `password`
+  Role: `admin`
+  Use case: second administrator so you can safely test admin-to-user role changes without removing the last admin from the system.
+- `freelancer@example.com` / `password`
+  Role: `user`
+  Use case: normal solo freelancer account for testing the everyday CRM flow without admin access.
+- `user@example.com` / `password`
+  Role: `user`
+  Use case: second regular user with separate client records, useful for confirming that users cannot see or change each other’s data.
+
+Each seeded account has its own client records and notes so you can test data ownership properly.
+
+## User Types and What They Can Do
+
+- `admin`
+  Main use case: manage the workspace itself.
+  Can: open the Admin screen, review users, and change user roles.
+  Cannot: see other users’ clients, notes, attachments, or activity just because they are an admin. Data ownership rules still apply.
+- `user`
+  Main use case: run their own CRM workspace.
+  Can: manage only their own clients, notes, attachments, reminders, imports, exports, and saved views.
+  Cannot: open the Admin screen or change roles.
+
 ## Useful Commands
 
 Build frontend assets:
@@ -113,6 +147,30 @@ Run the test suite:
 
 ```bash
 php artisan test
+```
+
+Preview reminder emails without sending anything:
+
+```bash
+php artisan crm:preview-followup-reminders
+```
+
+Preview reminders for one user on a specific date:
+
+```bash
+php artisan crm:preview-followup-reminders --user=owner@example.com --date=2026-03-30
+```
+
+Queue reminder emails manually:
+
+```bash
+php artisan crm:send-followup-reminders
+```
+
+Queue a reminder digest for one user right away:
+
+```bash
+php artisan crm:send-followup-reminders --user=owner@example.com --force
 ```
 
 Create a timestamped SQLite backup:
@@ -158,6 +216,12 @@ php artisan crm:backup:sqlite
 
 That command copies your active SQLite file into `storage/app/backups/sqlite` with a timestamped filename.
 
+Reminder emails are queued, so for local testing you should keep a worker running:
+
+```bash
+php artisan queue:work --tries=1 --timeout=90
+```
+
 ## Production Checklist
 
 1. Set a real `APP_URL`.
@@ -194,6 +258,9 @@ php artisan queue:work --tries=1 --timeout=90
 
 - Archive is separate from client status.
 - Permanent delete is only allowed after a client has been archived.
+- Client attachments are stored privately on the local disk by default and are removed from storage when an attachment or archived client is permanently deleted.
+- Tags are user-owned, so each account keeps its own labeling system and saved views.
+- The admin screen manages elevated access only. Users still only see their own clients, notes, attachments, and activity.
 - OAuth access tokens are not persisted.
 - CSV imports create new clients or update existing ones when the email already belongs to one of your clients.
 - The dashboard now includes reminder and activity sections so follow-up work is easier to prioritize.

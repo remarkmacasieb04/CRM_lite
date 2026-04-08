@@ -96,4 +96,20 @@ class ProfileUpdateTest extends TestCase
 
         $this->assertNotNull($user->fresh());
     }
+
+    public function test_user_can_update_follow_up_reminder_preferences(): void
+    {
+        $user = User::factory()->create([
+            'receives_follow_up_reminders' => true,
+        ]);
+
+        $this->actingAs($user)
+            ->patch(route('profile.reminders.update'), [
+                'receives_follow_up_reminders' => false,
+            ])
+            ->assertRedirect()
+            ->assertSessionHas('success');
+
+        $this->assertFalse($user->fresh()->receives_follow_up_reminders);
+    }
 }

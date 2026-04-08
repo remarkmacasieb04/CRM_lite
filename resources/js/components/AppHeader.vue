@@ -5,6 +5,7 @@ import { computed } from 'vue';
 import AppLogo from '@/components/AppLogo.vue';
 import AppLogoIcon from '@/components/AppLogoIcon.vue';
 import Breadcrumbs from '@/components/Breadcrumbs.vue';
+import UserRoleBadge from '@/components/crm/UserRoleBadge.vue';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import {
@@ -190,6 +191,13 @@ const rightNavItems: NavItem[] = [
                 </div>
 
                 <div class="ml-auto flex items-center space-x-2">
+                    <UserRoleBadge
+                        v-if="user"
+                        :role="user.role"
+                        :label="user.role_label"
+                        class="hidden lg:inline-flex"
+                    />
+
                     <div class="relative flex items-center space-x-1">
                         <Button
                             variant="ghost"
