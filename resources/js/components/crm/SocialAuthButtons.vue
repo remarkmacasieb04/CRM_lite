@@ -9,7 +9,7 @@ type Props = {
     prefix?: string;
 };
 
-const props = withDefaults(defineProps<Props>(), {
+withDefaults(defineProps<Props>(), {
     compact: false,
     prefix: 'Continue with',
 });
