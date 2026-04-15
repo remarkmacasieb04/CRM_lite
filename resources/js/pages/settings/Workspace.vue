@@ -56,7 +56,6 @@ defineOptions({
 });
 
 const page = usePage();
-const user = computed(() => page.props.auth.user as User | null);
 const currentWorkspace = computed(
     () => page.props.currentWorkspace as CurrentWorkspace | null,
 );
