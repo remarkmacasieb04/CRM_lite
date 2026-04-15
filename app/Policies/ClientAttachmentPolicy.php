@@ -9,11 +9,11 @@ class ClientAttachmentPolicy
 {
     public function view(User $user, ClientAttachment $attachment): bool
     {
-        return $attachment->user_id === $user->id;
+        return $attachment->workspace !== null && $user->belongsToWorkspace($attachment->workspace);
     }
 
     public function delete(User $user, ClientAttachment $attachment): bool
     {
-        return $attachment->user_id === $user->id;
+        return $attachment->workspace !== null && $user->belongsToWorkspace($attachment->workspace);
     }
 }

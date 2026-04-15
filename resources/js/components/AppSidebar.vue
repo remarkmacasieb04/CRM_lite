@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Link, usePage } from '@inertiajs/vue3';
-import { LayoutGrid, Settings, ShieldCheck, UsersRound } from 'lucide-vue-next';
+import { CheckSquare, LayoutGrid, Settings, ShieldCheck, UsersRound } from 'lucide-vue-next';
 import { computed } from 'vue';
 import AppLogo from '@/components/AppLogo.vue';
 import NavMain from '@/components/NavMain.vue';
@@ -18,6 +18,7 @@ import { dashboard } from '@/routes';
 import admin from '@/routes/admin';
 import { index as clientsIndex } from '@/routes/clients';
 import { edit as editProfile } from '@/routes/profile';
+import { index as tasksIndex } from '@/routes/tasks';
 import type { NavItem, User } from '@/types';
 
 const page = usePage();
@@ -33,6 +34,11 @@ const mainNavItems = computed<NavItem[]>(() => {
             title: 'Clients',
             href: clientsIndex(),
             icon: UsersRound,
+        },
+        {
+            title: 'Tasks',
+            href: tasksIndex(),
+            icon: CheckSquare,
         },
     ];
     const user = page.props.auth.user as User | null;

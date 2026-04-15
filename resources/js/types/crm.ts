@@ -3,6 +3,16 @@ export type ClientStatusOption = {
     label: string;
 };
 
+export type TaskStatusOption = {
+    value: string;
+    label: string;
+};
+
+export type TaskPriorityOption = {
+    value: string;
+    label: string;
+};
+
 export type ClientListFilters = {
     search: string | null;
     status: string | null;
@@ -64,6 +74,26 @@ export type ClientNote = {
     };
 };
 
+export type ClientCommunication = {
+    id: number;
+    channel: string | null;
+    channel_label: string | null;
+    direction: string | null;
+    direction_label: string | null;
+    subject: string | null;
+    summary: string;
+    happened_at: string | null;
+    author: {
+        id: number | null;
+        name: string | null;
+        email: string | null;
+    };
+    client?: {
+        id: number | null;
+        name: string | null;
+    };
+};
+
 export type ClientActivityEntry = {
     id: number;
     type: string | null;
@@ -86,11 +116,42 @@ export type ClientAttachment = {
     created_at: string | null;
 };
 
+export type ClientDocument = {
+    id: number;
+    type: string | null;
+    type_label: string | null;
+    title: string;
+    document_number: string;
+    status: string | null;
+    status_label: string | null;
+    amount: string | null;
+    currency: string;
+    issued_at: string | null;
+    due_at: string | null;
+    resolved_at: string | null;
+    notes: string | null;
+    is_portal_visible: boolean;
+};
+
+export type ClientPortalShare = {
+    id: number;
+    token: string;
+    expires_at: string | null;
+    last_viewed_at: string | null;
+    revoked_at: string | null;
+    created_at: string | null;
+    portal_url: string;
+};
+
 export type ClientDetail = Omit<ClientListItem, 'notes_count'> & {
     created_at: string | null;
     notes: ClientNote[];
     activities: ClientActivityEntry[];
     attachments: ClientAttachment[];
+    tasks: TaskItem[];
+    communications: ClientCommunication[];
+    documents: ClientDocument[];
+    portal_share: ClientPortalShare | null;
 };
 
 export type PaginationLink = {
@@ -114,6 +175,7 @@ export type DashboardStats = {
     totalClients: number;
     activeClients: number;
     leads: number;
+    openTasks: number;
     overdueFollowUps: number;
     followUpsDueSoon: number;
 };
@@ -169,4 +231,54 @@ export type DashboardActivityItem = {
         status: string | null;
         status_label: string | null;
     };
+};
+
+export type DashboardTaskItem = TaskItem;
+
+export type DashboardCommunicationItem = ClientCommunication;
+
+export type TaskItem = {
+    id: number;
+    title: string;
+    description: string | null;
+    status: string | null;
+    status_label: string | null;
+    priority: string | null;
+    priority_label: string | null;
+    due_at: string | null;
+    completed_at: string | null;
+    client: {
+        id: number | null;
+        name: string | null;
+    };
+    assignee: {
+        id: number | null;
+        name: string | null;
+        email: string | null;
+    };
+    creator: {
+        id: number | null;
+        name: string | null;
+        email: string | null;
+    };
+};
+
+export type DocumentTypeOption = {
+    value: string;
+    label: string;
+};
+
+export type DocumentStatusOption = {
+    value: string;
+    label: string;
+};
+
+export type CommunicationChannelOption = {
+    value: string;
+    label: string;
+};
+
+export type CommunicationDirectionOption = {
+    value: string;
+    label: string;
 };

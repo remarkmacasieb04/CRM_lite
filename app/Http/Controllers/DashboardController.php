@@ -5,7 +5,9 @@ namespace App\Http\Controllers;
 use App\Enums\ClientStatus;
 use App\Models\Client;
 use App\Models\ClientActivity;
+use App\Models\ClientCommunication;
 use App\Models\ClientNote;
+use App\Models\Task;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -14,13 +16,13 @@ class DashboardController extends Controller
 {
     public function __invoke(Request $request): Response
     {
-        $user = $request->user();
+        $workspace = $request->attributes->get('currentWorkspace');
         $baseQuery = Client::query()
-            ->ownedBy($user)
+            ->forWorkspace($workspace)
             ->withArchivedFilter(null);
 
         $recentlyUpdatedClients = Client::query()
-            ->ownedBy($user)
+            ->forWorkspace($workspace)
             ->withArchivedFilter(null)
             ->select(['id', 'name', 'company', 'status', 'updated_at', 'follow_up_at'])
             ->recentFirst()
@@ -28,9 +30,9 @@ class DashboardController extends Controller
             ->get();
 
         $recentNotes = ClientNote::query()
-            ->whereBelongsTo($user)
+            ->whereBelongsTo($workspace)
             ->with([
-                'client' => fn ($query) => $query->select(['id', 'user_id', 'name', 'status', 'archived_at']),
+                'client' => fn ($query) => $query->select(['id', 'workspace_id', 'user_id', 'name', 'status', 'archived_at']),
             ])
             ->latest()
             ->limit(6)
@@ -39,7 +41,7 @@ class DashboardController extends Controller
             ->values();
 
         $overdueFollowUps = Client::query()
-            ->ownedBy($user)
+            ->forWorkspace($workspace)
             ->withArchivedFilter(null)
             ->whereNotNull('follow_up_at')
             ->where('follow_up_at', '<', now()->startOfDay())
@@ -49,7 +51,7 @@ class DashboardController extends Controller
             ->get();
 
         $upcomingFollowUps = Client::query()
-            ->ownedBy($user)
+            ->forWorkspace($workspace)
             ->withArchivedFilter(null)
             ->whereNotNull('follow_up_at')
             ->whereBetween('follow_up_at', [now()->startOfDay(), now()->addDays(7)->endOfDay()])
@@ -59,12 +61,28 @@ class DashboardController extends Controller
             ->get();
 
         $recentActivities = ClientActivity::query()
-            ->whereBelongsTo($user)
+            ->whereBelongsTo($workspace)
             ->with([
-                'client' => fn ($query) => $query->select(['id', 'user_id', 'name', 'status', 'archived_at']),
+                'client' => fn ($query) => $query->select(['id', 'workspace_id', 'user_id', 'name', 'status', 'archived_at']),
             ])
             ->latest()
             ->limit(8)
+            ->get();
+
+        $upcomingTasks = Task::query()
+            ->forWorkspace($workspace)
+            ->with(['client:id,name', 'assignee:id,name,email', 'creator:id,name,email'])
+            ->openOnly()
+            ->orderBy('due_at')
+            ->latest('id')
+            ->limit(6)
+            ->get();
+
+        $recentCommunications = ClientCommunication::query()
+            ->whereBelongsTo($workspace)
+            ->with(['client:id,name', 'user:id,name,email'])
+            ->latest('happened_at')
+            ->limit(6)
             ->get();
 
         return Inertia::render('Dashboard', [
@@ -72,6 +90,7 @@ class DashboardController extends Controller
                 'totalClients' => (clone $baseQuery)->count(),
                 'activeClients' => (clone $baseQuery)->withStatus(ClientStatus::Active)->count(),
                 'leads' => (clone $baseQuery)->withStatus(ClientStatus::Lead)->count(),
+                'openTasks' => Task::query()->forWorkspace($workspace)->openOnly()->count(),
                 'overdueFollowUps' => (clone $baseQuery)
                     ->whereNotNull('follow_up_at')
                     ->where('follow_up_at', '<', now()->startOfDay())
@@ -136,6 +155,50 @@ class DashboardController extends Controller
                     'name' => $activity->client?->name ?? $activity->properties['client_name'] ?? 'Deleted client',
                     'status' => $activity->client?->status?->value,
                     'status_label' => $activity->client?->status?->label(),
+                ],
+            ]),
+            'upcomingTasks' => $upcomingTasks->map(fn (Task $task): array => [
+                'id' => $task->id,
+                'title' => $task->title,
+                'description' => $task->description,
+                'status' => $task->status?->value,
+                'status_label' => $task->status?->label(),
+                'priority' => $task->priority?->value,
+                'priority_label' => $task->priority?->label(),
+                'due_at' => $task->due_at?->toIso8601String(),
+                'completed_at' => $task->completed_at?->toIso8601String(),
+                'client' => [
+                    'id' => $task->client?->id,
+                    'name' => $task->client?->name,
+                ],
+                'assignee' => [
+                    'id' => $task->assignee?->id,
+                    'name' => $task->assignee?->name,
+                    'email' => $task->assignee?->email,
+                ],
+                'creator' => [
+                    'id' => $task->creator?->id,
+                    'name' => $task->creator?->name,
+                    'email' => $task->creator?->email,
+                ],
+            ]),
+            'recentCommunications' => $recentCommunications->map(fn (ClientCommunication $communication): array => [
+                'id' => $communication->id,
+                'channel' => $communication->channel?->value,
+                'channel_label' => $communication->channel?->label(),
+                'direction' => $communication->direction?->value,
+                'direction_label' => $communication->direction?->label(),
+                'subject' => $communication->subject,
+                'summary' => $communication->summary,
+                'happened_at' => $communication->happened_at?->toIso8601String(),
+                'author' => [
+                    'id' => $communication->user?->id,
+                    'name' => $communication->user?->name,
+                    'email' => $communication->user?->email,
+                ],
+                'client' => [
+                    'id' => $communication->client?->id,
+                    'name' => $communication->client?->name,
                 ],
             ]),
         ]);

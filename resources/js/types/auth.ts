@@ -27,6 +27,23 @@ export type Auth = {
     user: User | null;
 };
 
+export type CurrentWorkspace = {
+    id: number;
+    name: string;
+    slug: string;
+    is_personal: boolean;
+    role: string | null;
+    role_label: string | null;
+};
+
+export type WorkspaceOption = {
+    id: number;
+    name: string;
+    slug: string;
+    is_personal: boolean;
+    role: string | null;
+};
+
 export type FlashMessages = {
     success?: string | null;
     error?: string | null;

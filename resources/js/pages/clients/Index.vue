@@ -38,6 +38,7 @@ import {
     formatRelativeTime,
 } from '@/lib/formatters';
 import {
+    board,
     create as createClient,
     edit as editClient,
     exportMethod as exportClients,
@@ -324,6 +325,12 @@ const deleteSavedView = (savedView: SavedClientView) => {
                     </a>
                 </Button>
 
+                <Button variant="outline" as-child class="px-5">
+                    <Link :href="board()">
+                        Board view
+                    </Link>
+                </Button>
+
                 <Button as-child class="px-5">
                     <Link :href="createClient()">
                         <UserPlus2 class="size-4" />
@@ -517,8 +524,10 @@ const deleteSavedView = (savedView: SavedClientView) => {
         </div>
 
         <section class="crm-panel crm-panel-body">
-            <div class="grid gap-4 lg:grid-cols-[1.25fr_0.6fr_0.6fr_0.55fr_0.45fr_auto]">
-                <div class="grid gap-2">
+            <div
+                class="grid gap-4 md:grid-cols-2 xl:grid-cols-[minmax(18rem,1.35fr)_minmax(10rem,0.75fr)_minmax(10rem,0.75fr)_minmax(11rem,0.75fr)_minmax(12rem,0.7fr)]"
+            >
+                <div class="grid min-w-0 gap-2 md:col-span-2 xl:col-span-1">
                     <label
                         for="search"
                         class="text-sm font-medium text-slate-700 dark:text-slate-200"
@@ -533,12 +542,12 @@ const deleteSavedView = (savedView: SavedClientView) => {
                             id="search"
                             v-model="filters.search"
                             class="h-11 rounded-xl pl-9"
-                            placeholder="Search name, company, email, or phone"
+                            placeholder="Name, company, email, or phone"
                         />
                     </div>
                 </div>
 
-                <div class="grid gap-2">
+                <div class="grid min-w-0 gap-2">
                     <label
                         for="status"
                         class="text-sm font-medium text-slate-700 dark:text-slate-200"
@@ -561,7 +570,7 @@ const deleteSavedView = (savedView: SavedClientView) => {
                     </select>
                 </div>
 
-                <div class="grid gap-2">
+                <div class="grid min-w-0 gap-2">
                     <label
                         for="tag"
                         class="text-sm font-medium text-slate-700 dark:text-slate-200"
@@ -580,7 +589,7 @@ const deleteSavedView = (savedView: SavedClientView) => {
                     </select>
                 </div>
 
-                <div class="grid gap-2">
+                <div class="grid min-w-0 gap-2">
                     <label
                         for="follow_up"
                         class="text-sm font-medium text-slate-700 dark:text-slate-200"
@@ -598,7 +607,7 @@ const deleteSavedView = (savedView: SavedClientView) => {
                     </select>
                 </div>
 
-                <div class="grid gap-2">
+                <div class="grid min-w-0 gap-2">
                     <span
                         class="text-sm font-medium text-slate-700 dark:text-slate-200"
                     >
@@ -634,10 +643,10 @@ const deleteSavedView = (savedView: SavedClientView) => {
                     </div>
                 </div>
 
-                <div class="flex items-end">
+                <div class="flex items-end md:col-span-2 xl:col-span-5">
                     <Button
                         variant="outline"
-                        class="h-11 w-full"
+                        class="h-11 w-full justify-center md:w-auto"
                         @click="clearFilters"
                     >
                         <FilterX class="size-4" />

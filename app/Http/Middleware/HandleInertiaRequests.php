@@ -37,6 +37,8 @@ class HandleInertiaRequests extends Middleware
      */
     public function share(Request $request): array
     {
+        $workspace = $request->user()?->resolveCurrentWorkspace();
+
         return [
             ...parent::share($request),
             'name' => config('app.name'),
@@ -47,6 +49,24 @@ class HandleInertiaRequests extends Middleware
                 'success' => fn (): ?string => $request->session()->get('success'),
                 'error' => fn (): ?string => $request->session()->get('error'),
             ],
+            'currentWorkspace' => $workspace === null ? null : [
+                'id' => $workspace->id,
+                'name' => $workspace->name,
+                'slug' => $workspace->slug,
+                'is_personal' => $workspace->is_personal,
+                'role' => $request->user()?->workspaceRole($workspace)?->value,
+                'role_label' => $request->user()?->workspaceRole($workspace)?->label(),
+            ],
+            'availableWorkspaces' => $request->user()?->workspaces()
+                ->orderBy('workspaces.name')
+                ->get(['workspaces.id', 'workspaces.name', 'workspaces.slug', 'workspaces.is_personal'])
+                ->map(fn ($item): array => [
+                    'id' => $item->id,
+                    'name' => $item->name,
+                    'slug' => $item->slug,
+                    'is_personal' => (bool) $item->is_personal,
+                    'role' => is_string($item->pivot?->role) ? $item->pivot->role : null,
+                ])->all() ?? [],
             'socialProviders' => SocialAuth::enabledProviders(),
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
         ];

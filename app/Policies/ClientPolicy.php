@@ -14,7 +14,7 @@ class ClientPolicy
 
     public function view(User $user, Client $client): bool
     {
-        return $client->user()->is($user);
+        return $client->workspace !== null && $user->belongsToWorkspace($client->workspace);
     }
 
     public function create(User $user): bool
@@ -24,21 +24,21 @@ class ClientPolicy
 
     public function update(User $user, Client $client): bool
     {
-        return $client->user()->is($user);
+        return $client->workspace !== null && $user->belongsToWorkspace($client->workspace);
     }
 
     public function archive(User $user, Client $client): bool
     {
-        return $client->user()->is($user) && ! $client->isArchived();
+        return $this->update($user, $client) && ! $client->isArchived();
     }
 
     public function restore(User $user, Client $client): bool
     {
-        return $client->user()->is($user) && $client->isArchived();
+        return $this->update($user, $client) && $client->isArchived();
     }
 
     public function delete(User $user, Client $client): bool
     {
-        return $client->user()->is($user) && $client->isArchived();
+        return $this->update($user, $client) && $client->isArchived();
     }
 }

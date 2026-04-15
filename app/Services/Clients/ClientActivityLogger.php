@@ -21,6 +21,7 @@ class ClientActivityLogger
     ): ClientActivity {
         return ClientActivity::query()->create([
             'user_id' => $user->id,
+            'workspace_id' => $client?->workspace_id ?? $user->current_workspace_id,
             'client_id' => $client?->id,
             'type' => $type->value,
             'description' => $description,

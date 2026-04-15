@@ -16,8 +16,14 @@ class ClientFactory extends Factory
 
     public function definition(): array
     {
+        $user = User::factory();
+
         return [
-            'user_id' => User::factory(),
+            'user_id' => $user,
+            'workspace_id' => fn (array $attributes): ?int => User::query()
+                ->find($attributes['user_id'])
+                ?->resolveCurrentWorkspace()
+                ?->id,
             'name' => fake()->name(),
             'company' => fake()->company(),
             'email' => fake()->unique()->safeEmail(),

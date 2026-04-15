@@ -1,4 +1,10 @@
-import type { Auth, FlashMessages, SocialProviderOption } from '@/types/auth';
+import type {
+    Auth,
+    CurrentWorkspace,
+    FlashMessages,
+    SocialProviderOption,
+    WorkspaceOption,
+} from '@/types/auth';
 
 // Extend ImportMeta interface for Vite...
 declare module 'vite/client' {
@@ -19,6 +25,8 @@ declare module '@inertiajs/core' {
             name: string;
             auth: Auth;
             flash: FlashMessages;
+            currentWorkspace: CurrentWorkspace | null;
+            availableWorkspaces: WorkspaceOption[];
             socialProviders: SocialProviderOption[];
             sidebarOpen: boolean;
             [key: string]: unknown;

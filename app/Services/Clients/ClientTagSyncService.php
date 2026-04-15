@@ -3,6 +3,7 @@
 namespace App\Services\Clients;
 
 use App\Models\Client;
+use App\Models\Tag;
 use App\Models\User;
 use Illuminate\Support\Str;
 
@@ -23,9 +24,15 @@ class ClientTagSyncService
         }
 
         $tagIds = $tagNames->map(function (string $name) use ($user): int {
-            $tag = $user->tags()->firstOrCreate(
-                ['slug' => Str::slug($name)],
-                ['name' => $name],
+            $tag = Tag::query()->firstOrCreate(
+                [
+                    'workspace_id' => $user->current_workspace_id,
+                    'slug' => Str::slug($name),
+                ],
+                [
+                    'user_id' => $user->id,
+                    'name' => $name,
+                ],
             );
 
             if ($tag->name !== $name) {

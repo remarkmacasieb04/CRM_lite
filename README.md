@@ -18,13 +18,19 @@ CRM Lite is a Laravel 13 + Vue 3 + Inertia.js CRM for freelancers and small serv
 - Custom login, registration, password reset, remember me, logout, and email verification
 - Optional social login with Google, Facebook, and GitHub
 - Dashboard stats for total clients, active clients, leads, due follow-ups, recent clients, and recent notes
+- Workspace-aware dashboard widgets for open tasks and recent communications
 - Follow-up reminder panels for overdue and upcoming clients
 - Daily reminder email preferences plus CLI reminder commands for local development
+- Personal and shared workspaces with member roles, workspace switching, and invite-by-email membership
 - Client create, edit, show, archive, restore, and permanent delete after archive
 - Admin/user roles with a simple admin workspace screen
 - CSV export with current filters applied
 - CSV import with validation and safe email-based updates
 - Client notes timeline
+- Client task tracking with priorities, due dates, and completion states
+- Client communication logging for calls, emails, meetings, and messages
+- Proposal and invoice lite tracking tied to each client
+- Secure token-based client portal links for shared client-facing document views
 - Private client attachments with upload, download, and cleanup on delete
 - Client tags, smart views, and saved views for repeat filtering
 - Client activity timeline and dashboard activity feed
@@ -123,6 +129,8 @@ If you run the local sample seeder, CRM Lite creates these accounts:
   Use case: second regular user with separate client records, useful for confirming that users cannot see or change each other’s data.
 
 Each seeded account has its own client records and notes so you can test data ownership properly.
+
+The sample seeder also creates a shared workspace called `Acme Collaborative` with all four demo users added as members. Use the Workspace settings page to switch into it and test the multi-user workspace flow, shared clients, tasks, communications, proposals, and portal links.
 
 ## User Types and What They Can Do
 

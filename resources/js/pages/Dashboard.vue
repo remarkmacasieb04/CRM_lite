@@ -4,9 +4,11 @@ import {
     AlertTriangle,
     BriefcaseBusiness,
     CalendarClock,
+    CheckSquare,
     CircleDashed,
     Clock3,
     Mail,
+    MessageCircleMore,
     NotebookText,
     Sparkles,
     TrendingUp,
@@ -28,10 +30,12 @@ import { dashboard } from '@/routes';
 import { show as showClient } from '@/routes/clients';
 import type {
     DashboardActivityItem,
+    DashboardCommunicationItem,
     DashboardRecentClient,
     DashboardRecentNote,
     DashboardReminderGroup,
     DashboardStats,
+    DashboardTaskItem,
 } from '@/types';
 
 defineOptions({
@@ -51,6 +55,8 @@ defineProps<{
     recentNotes: DashboardRecentNote[];
     followUpReminders: DashboardReminderGroup;
     recentActivity: DashboardActivityItem[];
+    upcomingTasks: DashboardTaskItem[];
+    recentCommunications: DashboardCommunicationItem[];
 }>();
 </script>
 
@@ -65,7 +71,7 @@ defineProps<{
         />
 
         <div
-            class="grid gap-4 min-[1700px]:grid-cols-5 md:grid-cols-2 xl:grid-cols-3"
+            class="grid gap-4 min-[1700px]:grid-cols-6 md:grid-cols-2 xl:grid-cols-3"
         >
             <StatCard
                 title="Total clients"
@@ -84,6 +90,12 @@ defineProps<{
                 :value="stats.leads"
                 description="Early-stage opportunities still warming up."
                 :icon="Sparkles"
+            />
+            <StatCard
+                title="Open tasks"
+                :value="stats.openTasks"
+                description="Next actions still in progress across your workspace."
+                :icon="CheckSquare"
             />
             <StatCard
                 title="Overdue"
@@ -298,6 +310,104 @@ defineProps<{
                         title="No follow-ups scheduled this week"
                         description="Once you add follow-up dates, they will appear here in deadline order."
                         :icon="Clock3"
+                    />
+                </CardContent>
+            </Card>
+        </div>
+
+        <div class="grid gap-6 xl:grid-cols-2">
+            <Card>
+                <CardHeader>
+                    <CardTitle class="text-xl">Upcoming tasks</CardTitle>
+                    <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">
+                        Work that still needs to move before the client relationship stalls.
+                    </p>
+                </CardHeader>
+                <CardContent>
+                    <div v-if="upcomingTasks.length > 0" class="space-y-3">
+                        <div
+                            v-for="task in upcomingTasks"
+                            :key="task.id"
+                            class="crm-list-item"
+                        >
+                            <div class="flex items-start justify-between gap-3">
+                                <div class="space-y-2">
+                                    <div class="flex flex-wrap items-center gap-2">
+                                        <p class="font-semibold text-slate-950 dark:text-white">
+                                            {{ task.title }}
+                                        </p>
+                                        <span class="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-600 dark:bg-slate-800 dark:text-slate-300">
+                                            {{ task.priority_label || 'Priority' }}
+                                        </span>
+                                    </div>
+                                    <p v-if="task.description" class="text-sm text-slate-600 dark:text-slate-300">
+                                        {{ task.description }}
+                                    </p>
+                                    <div class="flex flex-wrap gap-4 text-sm text-slate-500 dark:text-slate-400">
+                                        <span>Client {{ task.client.name || 'General task' }}</span>
+                                        <span>Due {{ formatDate(task.due_at) }}</span>
+                                        <span>Assignee {{ task.assignee.name || 'Unassigned' }}</span>
+                                    </div>
+                                </div>
+                                <StatusBadge :status="task.status" :label="task.status_label" />
+                            </div>
+                        </div>
+                    </div>
+                    <EmptyState
+                        v-else
+                        title="No open tasks"
+                        description="Create tasks from your task board or client pages to turn follow-up intent into clear work."
+                        :icon="CheckSquare"
+                    />
+                </CardContent>
+            </Card>
+
+            <Card>
+                <CardHeader>
+                    <CardTitle class="text-xl">Recent communications</CardTitle>
+                    <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">
+                        A lightweight communication log so you can see the latest outreach at a glance.
+                    </p>
+                </CardHeader>
+                <CardContent>
+                    <div v-if="recentCommunications.length > 0" class="space-y-3">
+                        <div
+                            v-for="communication in recentCommunications"
+                            :key="communication.id"
+                            class="crm-list-item"
+                        >
+                            <div class="flex items-start justify-between gap-3">
+                                <div class="space-y-2">
+                                    <div class="flex flex-wrap items-center gap-2">
+                                        <p class="font-semibold text-slate-950 dark:text-white">
+                                            {{ communication.client?.name || 'Unknown client' }}
+                                        </p>
+                                        <span class="rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-200">
+                                            {{ communication.channel_label || 'Touchpoint' }}
+                                        </span>
+                                        <span class="text-xs font-semibold tracking-[0.16em] text-slate-400 uppercase">
+                                            {{ communication.direction_label || 'Logged' }}
+                                        </span>
+                                    </div>
+                                    <p v-if="communication.subject" class="text-sm font-medium text-slate-700 dark:text-slate-200">
+                                        {{ communication.subject }}
+                                    </p>
+                                    <p class="text-sm text-slate-600 dark:text-slate-300">
+                                        {{ communication.summary }}
+                                    </p>
+                                </div>
+                                <div class="flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400">
+                                    <MessageCircleMore class="size-4" />
+                                    {{ formatDateTime(communication.happened_at) }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <EmptyState
+                        v-else
+                        title="No communications logged yet"
+                        description="Log calls, emails, meetings, or messages from a client page and they will show up here."
+                        :icon="MessageCircleMore"
                     />
                 </CardContent>
             </Card>

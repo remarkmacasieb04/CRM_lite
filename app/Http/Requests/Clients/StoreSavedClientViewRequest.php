@@ -27,7 +27,7 @@ class StoreSavedClientViewRequest extends FormRequest
                 'string',
                 'max:80',
                 Rule::unique('saved_client_views', 'name')->where(
-                    fn ($query) => $query->where('user_id', $this->user()?->id),
+                    fn ($query) => $query->where('workspace_id', $this->user()?->current_workspace_id),
                 ),
             ],
         ];
