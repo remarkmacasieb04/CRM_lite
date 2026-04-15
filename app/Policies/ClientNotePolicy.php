@@ -9,6 +9,6 @@ class ClientNotePolicy
 {
     public function create(User $user, Client $client): bool
     {
-        return $client->user()->is($user);
+        return $client->workspace !== null && $user->belongsToWorkspace($client->workspace);
     }
 }

@@ -14,6 +14,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 #[Fillable([
     'user_id',
+    'workspace_id',
     'name',
     'company',
     'email',
@@ -29,6 +30,20 @@ class Client extends Model
 {
     /** @use HasFactory<ClientFactory> */
     use HasFactory;
+
+    protected static function booted(): void
+    {
+        static::creating(function (self $client): void {
+            if ($client->workspace_id !== null || $client->user_id === null) {
+                return;
+            }
+
+            $client->workspace_id = User::query()
+                ->find($client->user_id)
+                ?->resolveCurrentWorkspace()
+                ?->id;
+        });
+    }
 
     protected function casts(): array
     {
@@ -46,6 +61,11 @@ class Client extends Model
         return $this->belongsTo(User::class);
     }
 
+    public function workspace(): BelongsTo
+    {
+        return $this->belongsTo(Workspace::class);
+    }
+
     public function notes(): HasMany
     {
         return $this->hasMany(ClientNote::class);
@@ -61,6 +81,26 @@ class Client extends Model
         return $this->hasMany(ClientAttachment::class);
     }
 
+    public function communications(): HasMany
+    {
+        return $this->hasMany(ClientCommunication::class);
+    }
+
+    public function documents(): HasMany
+    {
+        return $this->hasMany(ClientDocument::class);
+    }
+
+    public function portalShares(): HasMany
+    {
+        return $this->hasMany(ClientPortalShare::class);
+    }
+
+    public function tasks(): HasMany
+    {
+        return $this->hasMany(Task::class);
+    }
+
     public function tags(): BelongsToMany
     {
         return $this->belongsToMany(Tag::class)->withTimestamps();
@@ -74,6 +114,11 @@ class Client extends Model
     public function scopeOwnedBy(Builder $query, User $user): void
     {
         $query->whereBelongsTo($user);
+    }
+
+    public function scopeForWorkspace(Builder $query, Workspace $workspace): void
+    {
+        $query->whereBelongsTo($workspace);
     }
 
     public function scopeSearch(Builder $query, ?string $search): void
@@ -118,15 +163,15 @@ class Client extends Model
         $query->orderByDesc('updated_at');
     }
 
-    public function scopeWithTagSlug(Builder $query, User $user, ?string $tagSlug): void
+    public function scopeWithTagSlug(Builder $query, Workspace $workspace, ?string $tagSlug): void
     {
         if (blank($tagSlug)) {
             return;
         }
 
-        $query->whereHas('tags', function (Builder $tagQuery) use ($user, $tagSlug): void {
+        $query->whereHas('tags', function (Builder $tagQuery) use ($workspace, $tagSlug): void {
             $tagQuery
-                ->whereBelongsTo($user)
+                ->whereBelongsTo($workspace)
                 ->where('slug', $tagSlug);
         });
     }

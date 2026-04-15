@@ -22,6 +22,7 @@ class ClientNoteController extends Controller
         DB::transaction(function () use ($request, $client): ClientNote {
             $note = $client->notes()->create([
                 'user_id' => $request->user()->id,
+                'workspace_id' => $client->workspace_id,
                 'content' => $request->validated('content'),
             ]);
 

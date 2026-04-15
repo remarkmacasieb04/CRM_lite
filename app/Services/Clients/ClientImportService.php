@@ -4,6 +4,7 @@ namespace App\Services\Clients;
 
 use App\Enums\ClientActivityType;
 use App\Enums\ClientStatus;
+use App\Models\Client;
 use App\Models\User;
 use App\Support\ClientData;
 use Illuminate\Http\UploadedFile;
@@ -24,8 +25,15 @@ class ClientImportService
     public function import(User $user, UploadedFile $file): array
     {
         $rows = $this->parseAndValidateRows($file);
+        $workspace = $user->resolveCurrentWorkspace();
 
-        return DB::transaction(function () use ($user, $rows): array {
+        if ($workspace === null) {
+            throw ValidationException::withMessages([
+                'file' => ['No workspace is active for this account.'],
+            ]);
+        }
+
+        return DB::transaction(function () use ($user, $rows, $workspace): array {
             $created = 0;
             $updated = 0;
             $skipped = 0;
@@ -34,13 +42,17 @@ class ClientImportService
                 $existingClient = null;
 
                 if (! blank($row['email'])) {
-                    $existingClient = $user->clients()
+                    $existingClient = Client::query()
+                        ->forWorkspace($workspace)
                         ->where('email', $row['email'])
                         ->first();
                 }
 
                 if ($existingClient === null) {
-                    $client = $user->clients()->create($row);
+                    $client = $user->clients()->create([
+                        ...$row,
+                        'workspace_id' => $workspace->id,
+                    ]);
                     $created++;
 
                     $this->clientActivityLogger->record(

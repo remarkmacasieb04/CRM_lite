@@ -14,6 +14,7 @@ class SavedClientViewController extends Controller
     public function store(StoreSavedClientViewRequest $request): RedirectResponse
     {
         $request->user()->savedClientViews()->create([
+            'workspace_id' => $request->user()?->current_workspace_id,
             'name' => $request->validated('name'),
             'filters' => ClientFilters::active($request->validated()),
         ]);
@@ -23,7 +24,10 @@ class SavedClientViewController extends Controller
 
     public function destroy(Request $request, SavedClientView $savedClientView): RedirectResponse
     {
-        abort_unless($savedClientView->user_id === $request->user()?->id, 403);
+        abort_unless(
+            $savedClientView->workspace_id === $request->user()?->current_workspace_id,
+            403,
+        );
 
         $savedClientView->delete();
 

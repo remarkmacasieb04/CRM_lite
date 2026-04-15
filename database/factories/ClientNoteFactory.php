@@ -4,7 +4,6 @@ namespace Database\Factories;
 
 use App\Models\Client;
 use App\Models\ClientNote;
-use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -16,9 +15,12 @@ class ClientNoteFactory extends Factory
 
     public function definition(): array
     {
+        $client = Client::factory();
+
         return [
-            'client_id' => Client::factory(),
-            'user_id' => User::factory(),
+            'client_id' => $client,
+            'user_id' => fn (array $attributes): ?int => Client::query()->find($attributes['client_id'])?->user_id,
+            'workspace_id' => fn (array $attributes): ?int => Client::query()->find($attributes['client_id'])?->workspace_id,
             'content' => fake()->paragraph(),
         ];
     }

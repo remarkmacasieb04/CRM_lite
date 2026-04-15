@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 #[Fillable([
     'user_id',
+    'workspace_id',
     'client_id',
     'type',
     'description',
@@ -16,6 +17,19 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 ])]
 class ClientActivity extends Model
 {
+    protected static function booted(): void
+    {
+        static::creating(function (self $activity): void {
+            if ($activity->workspace_id !== null) {
+                return;
+            }
+
+            $activity->workspace_id = $activity->client_id !== null
+                ? Client::query()->find($activity->client_id)?->workspace_id
+                : User::query()->find($activity->user_id)?->current_workspace_id;
+        });
+    }
+
     protected function casts(): array
     {
         return [
@@ -27,6 +41,11 @@ class ClientActivity extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function workspace(): BelongsTo
+    {
+        return $this->belongsTo(Workspace::class);
     }
 
     public function client(): BelongsTo

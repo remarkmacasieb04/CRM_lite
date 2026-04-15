@@ -19,6 +19,7 @@ class ClientAttachmentStorage
 
         return $client->attachments()->create([
             'user_id' => $user->id,
+            'workspace_id' => $client->workspace_id,
             'disk' => 'local',
             'path' => $path,
             'original_name' => $uploadedFile->getClientOriginalName(),

@@ -35,7 +35,9 @@ const page = usePage();
 const authUser = computed(() => page.props.auth.user as User | null);
 const savingUserId = ref<number | null>(null);
 const selectedRoles = reactive<Record<number, string>>(
-    Object.fromEntries(props.users.map((user) => [user.id, user.role ?? 'user'])),
+    Object.fromEntries(
+        props.users.map((user) => [user.id, user.role ?? 'user']),
+    ),
 );
 
 const adminCount = computed(
@@ -45,7 +47,8 @@ const verifiedCount = computed(
     () => props.users.filter((user) => user.email_verified_at !== null).length,
 );
 const reminderCount = computed(
-    () => props.users.filter((user) => user.receives_follow_up_reminders).length,
+    () =>
+        props.users.filter((user) => user.receives_follow_up_reminders).length,
 );
 
 const saveRole = (user: AdminUserListItem) => {
@@ -142,9 +145,11 @@ const saveRole = (user: AdminUserListItem) => {
                             class="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-slate-500 dark:text-slate-400"
                         >
                             <span>{{ user.email }}</span>
-                            <span>{{ user.clients_count }} client{{
-                                user.clients_count === 1 ? '' : 's'
-                            }}</span>
+                            <span
+                                >{{ user.clients_count }} client{{
+                                    user.clients_count === 1 ? '' : 's'
+                                }}</span
+                            >
                             <span>{{
                                 user.email_verified_at
                                     ? 'Email verified'
@@ -180,7 +185,8 @@ const saveRole = (user: AdminUserListItem) => {
                         <Input
                             :id="`digest-${user.id}`"
                             :model-value="
-                                user.last_follow_up_digest_sent_at ?? 'Not sent yet'
+                                user.last_follow_up_digest_sent_at ??
+                                'Not sent yet'
                             "
                             readonly
                             class="h-11"

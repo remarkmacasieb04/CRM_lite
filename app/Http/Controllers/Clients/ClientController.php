@@ -4,13 +4,26 @@ namespace App\Http\Controllers\Clients;
 
 use App\Enums\ClientActivityType;
 use App\Enums\ClientStatus;
+use App\Enums\CommunicationChannel;
+use App\Enums\CommunicationDirection;
+use App\Enums\DocumentStatus;
+use App\Enums\DocumentType;
+use App\Enums\TaskPriority;
+use App\Enums\TaskStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Clients\ClientIndexRequest;
 use App\Http\Requests\Clients\ImportClientsRequest;
 use App\Http\Requests\Clients\StoreClientRequest;
 use App\Http\Requests\Clients\UpdateClientRequest;
+use App\Http\Requests\Clients\UpdateClientStatusRequest;
 use App\Models\Client;
-use App\Models\User;
+use App\Models\ClientCommunication;
+use App\Models\ClientDocument;
+use App\Models\ClientPortalShare;
+use App\Models\SavedClientView;
+use App\Models\Tag;
+use App\Models\Task;
+use App\Models\Workspace;
 use App\Services\Clients\ClientActivityLogger;
 use App\Services\Clients\ClientAttachmentStorage;
 use App\Services\Clients\ClientImportService;
@@ -40,8 +53,9 @@ class ClientController extends Controller
 
         $filters = $request->validated();
         $user = $request->user();
+        $workspace = $request->attributes->get('currentWorkspace');
 
-        $clients = $this->filteredClientsQuery($user, $filters)
+        $clients = $this->filteredClientsQuery($workspace, $filters)
             ->with('tags:id,name,slug')
             ->withCount('notes')
             ->recentFirst()
@@ -73,9 +87,9 @@ class ClientController extends Controller
             'clients' => $clients,
             'filters' => $this->clientListFilters($filters),
             'statusOptions' => ClientStatus::options(),
-            'tagOptions' => $this->availableTags($user),
-            'savedViews' => $this->savedViews($user, $filters),
-            'smartViews' => $this->smartViews($user, $filters),
+            'tagOptions' => $this->availableTags($workspace),
+            'savedViews' => $this->savedViews($workspace, $filters),
+            'smartViews' => $this->smartViews($workspace, $filters),
         ]);
     }
 
@@ -84,10 +98,10 @@ class ClientController extends Controller
         $this->authorize('viewAny', Client::class);
 
         $filters = $request->validated();
-        $user = $request->user();
+        $workspace = $request->attributes->get('currentWorkspace');
         $fileName = $this->exportFileName($filters['archived'] ?? null);
 
-        $clients = $this->filteredClientsQuery($user, $filters)
+        $clients = $this->filteredClientsQuery($workspace, $filters)
             ->recentFirst()
             ->get([
                 'name',
@@ -155,18 +169,60 @@ class ClientController extends Controller
 
         return Inertia::render('clients/Create', [
             'statusOptions' => ClientStatus::options(),
-            'availableTags' => $this->availableTags(request()->user()),
+            'availableTags' => $this->availableTags(request()->attributes->get('currentWorkspace')),
+        ]);
+    }
+
+    public function board(Request $request): Response
+    {
+        $this->authorize('viewAny', Client::class);
+
+        /** @var Workspace $workspace */
+        $workspace = $request->attributes->get('currentWorkspace');
+
+        $clients = Client::query()
+            ->forWorkspace($workspace)
+            ->withArchivedFilter(null)
+            ->recentFirst()
+            ->get(['id', 'name', 'company', 'status', 'follow_up_at', 'updated_at']);
+
+        $columns = collect(ClientStatus::cases())
+            ->map(fn (ClientStatus $status): array => [
+                'value' => $status->value,
+                'label' => $status->label(),
+                'clients' => $clients
+                    ->where('status', $status)
+                    ->values()
+                    ->map(fn (Client $client): array => [
+                        'id' => $client->id,
+                        'name' => $client->name,
+                        'company' => $client->company,
+                        'status' => $client->status?->value,
+                        'status_label' => $client->status?->label(),
+                        'follow_up_at' => $client->follow_up_at?->toIso8601String(),
+                        'updated_at' => $client->updated_at?->toIso8601String(),
+                    ])->all(),
+            ])->all();
+
+        return Inertia::render('clients/Board', [
+            'columns' => $columns,
+            'statusOptions' => ClientStatus::options(),
         ]);
     }
 
     public function store(StoreClientRequest $request): RedirectResponse
     {
         $client = DB::transaction(function () use ($request): Client {
+            /** @var Workspace|null $workspace */
+            $workspace = $request->attributes->get('currentWorkspace');
             $attributes = collect($request->validated())
                 ->except('tags')
                 ->all();
 
             $client = $request->user()->clients()->create($attributes);
+            $client->forceFill([
+                'workspace_id' => $workspace?->id,
+            ])->save();
 
             $this->clientTagSyncService->sync(
                 $request->user(),
@@ -217,6 +273,20 @@ class ClientController extends Controller
             'notes' => fn ($query) => $query
                 ->with('user:id,name,email')
                 ->latest(),
+            'tasks' => fn ($query) => $query
+                ->with(['assignee:id,name,email', 'creator:id,name,email'])
+                ->orderBy('completed_at')
+                ->orderBy('due_at')
+                ->latest('id'),
+            'communications' => fn ($query) => $query
+                ->with('user:id,name,email')
+                ->latest('happened_at')
+                ->limit(8),
+            'documents' => fn ($query) => $query
+                ->latest('issued_at')
+                ->latest(),
+            'portalShares' => fn ($query) => $query
+                ->latest(),
             'activities' => fn ($query) => $query
                 ->with('user:id,name,email')
                 ->latest()
@@ -228,6 +298,12 @@ class ClientController extends Controller
         return Inertia::render('clients/Show', [
             'client' => $this->clientPayload($client),
             'statusOptions' => ClientStatus::options(),
+            'taskStatusOptions' => TaskStatus::options(),
+            'taskPriorityOptions' => TaskPriority::options(),
+            'communicationChannelOptions' => CommunicationChannel::options(),
+            'communicationDirectionOptions' => CommunicationDirection::options(),
+            'documentTypeOptions' => DocumentType::options(),
+            'documentStatusOptions' => DocumentStatus::options(),
         ]);
     }
 
@@ -242,7 +318,7 @@ class ClientController extends Controller
         return Inertia::render('clients/Edit', [
             'client' => $this->clientPayload($client),
             'statusOptions' => ClientStatus::options(),
-            'availableTags' => $this->availableTags(request()->user()),
+            'availableTags' => $this->availableTags(request()->attributes->get('currentWorkspace')),
         ]);
     }
 
@@ -378,6 +454,23 @@ class ClientController extends Controller
         return back()->with('success', 'Last contacted date updated to today.');
     }
 
+    public function updateStatus(UpdateClientStatusRequest $request, Client $client): RedirectResponse
+    {
+        $client->forceFill([
+            'status' => $request->validated('status'),
+        ])->save();
+
+        $this->clientActivityLogger->record(
+            $request->user(),
+            $client,
+            ClientActivityType::Updated,
+            'Moved this client to a different pipeline stage.',
+            ['changed_fields' => ['status']],
+        );
+
+        return back()->with('success', 'Client stage updated.');
+    }
+
     /**
      * @param  array{
      *     search?: ?string,
@@ -389,13 +482,13 @@ class ClientController extends Controller
      *     page?: ?int
      * }  $filters
      */
-    private function filteredClientsQuery(User $user, array $filters): Builder
+    private function filteredClientsQuery(Workspace $workspace, array $filters): Builder
     {
         return Client::query()
-            ->ownedBy($user)
+            ->forWorkspace($workspace)
             ->search($filters['search'] ?? null)
             ->withStatus($filters['status'] ?? null)
-            ->withTagSlug($user, $filters['tag'] ?? null)
+            ->withTagSlug($workspace, $filters['tag'] ?? null)
             ->withFollowUpFilter($filters['follow_up'] ?? null)
             ->withStaleContactFilter($filters['stale'] ?? null)
             ->withArchivedFilter($filters['archived'] ?? null);
@@ -468,6 +561,82 @@ class ClientController extends Controller
                     'created_at' => $attachment->created_at?->toIso8601String(),
                 ])->all()
                 : [],
+            'tasks' => $client->relationLoaded('tasks')
+                ? $client->tasks->map(fn (Task $task): array => [
+                    'id' => $task->id,
+                    'title' => $task->title,
+                    'description' => $task->description,
+                    'status' => $task->status?->value,
+                    'status_label' => $task->status?->label(),
+                    'priority' => $task->priority?->value,
+                    'priority_label' => $task->priority?->label(),
+                    'due_at' => $task->due_at?->toIso8601String(),
+                    'completed_at' => $task->completed_at?->toIso8601String(),
+                    'client' => [
+                        'id' => $client->id,
+                        'name' => $client->name,
+                    ],
+                    'assignee' => [
+                        'id' => $task->assignee?->id,
+                        'name' => $task->assignee?->name,
+                        'email' => $task->assignee?->email,
+                    ],
+                    'creator' => [
+                        'id' => $task->creator?->id,
+                        'name' => $task->creator?->name,
+                        'email' => $task->creator?->email,
+                    ],
+                ])->all()
+                : [],
+            'communications' => $client->relationLoaded('communications')
+                ? $client->communications->map(fn (ClientCommunication $communication): array => [
+                    'id' => $communication->id,
+                    'channel' => $communication->channel?->value,
+                    'channel_label' => $communication->channel?->label(),
+                    'direction' => $communication->direction?->value,
+                    'direction_label' => $communication->direction?->label(),
+                    'subject' => $communication->subject,
+                    'summary' => $communication->summary,
+                    'happened_at' => $communication->happened_at?->toIso8601String(),
+                    'author' => [
+                        'id' => $communication->user?->id,
+                        'name' => $communication->user?->name,
+                        'email' => $communication->user?->email,
+                    ],
+                ])->all()
+                : [],
+            'documents' => $client->relationLoaded('documents')
+                ? $client->documents->map(fn (ClientDocument $document): array => [
+                    'id' => $document->id,
+                    'type' => $document->type?->value,
+                    'type_label' => $document->type?->label(),
+                    'title' => $document->title,
+                    'document_number' => $document->document_number,
+                    'status' => $document->status?->value,
+                    'status_label' => $document->status?->label(),
+                    'amount' => $document->amount,
+                    'currency' => $document->currency,
+                    'issued_at' => $document->issued_at?->toIso8601String(),
+                    'due_at' => $document->due_at?->toIso8601String(),
+                    'resolved_at' => $document->resolved_at?->toIso8601String(),
+                    'notes' => $document->notes,
+                    'is_portal_visible' => $document->is_portal_visible,
+                ])->all()
+                : [],
+            'portal_share' => $client->relationLoaded('portalShares')
+                ? ($share = $client->portalShares
+                    ->first(fn (ClientPortalShare $share): bool => $share->isActive())) !== null
+                    ? [
+                        'id' => $share->id,
+                        'token' => $share->token,
+                        'expires_at' => $share->expires_at?->toIso8601String(),
+                        'last_viewed_at' => $share->last_viewed_at?->toIso8601String(),
+                        'revoked_at' => $share->revoked_at?->toIso8601String(),
+                        'created_at' => $share->created_at?->toIso8601String(),
+                        'portal_url' => route('portal.show', $share->token),
+                    ]
+                    : null
+                : null,
         ];
     }
 
@@ -490,9 +659,10 @@ class ClientController extends Controller
     /**
      * @return array<int, array{id: int, name: string, slug: string}>
      */
-    private function availableTags(User $user): array
+    private function availableTags(Workspace $workspace): array
     {
-        return $user->tags()
+        return Tag::query()
+            ->whereBelongsTo($workspace)
             ->orderBy('name')
             ->get(['id', 'name', 'slug'])
             ->map(fn ($tag): array => [
@@ -507,9 +677,10 @@ class ClientController extends Controller
      * @param  array<string, mixed>  $currentFilters
      * @return array<int, array<string, mixed>>
      */
-    private function savedViews(User $user, array $currentFilters): array
+    private function savedViews(Workspace $workspace, array $currentFilters): array
     {
-        return $user->savedClientViews()
+        return SavedClientView::query()
+            ->whereBelongsTo($workspace)
             ->latest()
             ->get()
             ->map(fn ($savedView): array => [
@@ -525,10 +696,10 @@ class ClientController extends Controller
      * @param  array<string, mixed>  $currentFilters
      * @return array<int, array<string, mixed>>
      */
-    private function smartViews(User $user, array $currentFilters): array
+    private function smartViews(Workspace $workspace, array $currentFilters): array
     {
         $baseQuery = Client::query()
-            ->ownedBy($user)
+            ->forWorkspace($workspace)
             ->withArchivedFilter(null);
 
         $views = [

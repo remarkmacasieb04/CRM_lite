@@ -26,8 +26,8 @@ const isAuthenticated = computed(() => page.props.auth.user !== null);
 
 <template>
     <Head title="CRM Lite">
-        <link rel="icon" href="/CRM-lite-logo.ico" sizes="any">
-        <link rel="icon" href="/CRM-lite-logo.svg" type="image/svg+xml">
+        <link rel="icon" href="/CRM-lite-logo.ico" sizes="any" />
+        <link rel="icon" href="/CRM-lite-logo.svg" type="image/svg+xml" />
     </Head>
 
     <div
@@ -47,14 +47,12 @@ const isAuthenticated = computed(() => page.props.auth.user !== null);
                 :href="home()"
                 class="flex items-center gap-4 rounded-[1.75rem] border border-white/10 bg-white/8 px-4 py-3 shadow-lg shadow-black/20 backdrop-blur-md"
             >
-                <div
-                    class="rounded-2xl bg-white/10 p-2.5 ring-1 ring-white/10"
-                >
+                <div class="rounded-2xl bg-white/10 p-2.5 ring-1 ring-white/10">
                     <img
                         src="/CRM-lite-logo.svg"
                         alt="CRM Lite logo"
                         class="size-10 rounded-xl object-contain"
-                    >
+                    />
                 </div>
                 <div>
                     <p
@@ -114,16 +112,16 @@ const isAuthenticated = computed(() => page.props.auth.user !== null);
                     Look sharper, follow up faster, and keep every client
                     moving.
                 </h1>
-                <p
-                    class="mt-6 max-w-2xl text-lg leading-8 text-slate-300"
-                >
+                <p class="mt-6 max-w-2xl text-lg leading-8 text-slate-300">
                     CRM Lite gives freelancers and small service teams a calm,
                     premium-looking workspace for leads, proposals, follow-ups,
                     notes, and delivery. Spend less time chasing details and
                     more time looking organized in front of clients.
                 </p>
 
-                <div class="mt-8 grid gap-3 text-sm text-slate-200 sm:grid-cols-2">
+                <div
+                    class="mt-8 grid gap-3 text-sm text-slate-200 sm:grid-cols-2"
+                >
                     <div
                         class="rounded-2xl border border-white/10 bg-white/6 px-4 py-3 backdrop-blur"
                     >
@@ -170,17 +168,13 @@ const isAuthenticated = computed(() => page.props.auth.user !== null);
                     <div
                         class="rounded-[1.75rem] border border-white/10 bg-white/8 p-5 backdrop-blur"
                     >
-                        <p
-                            class="text-sm font-medium text-slate-300"
-                        >
+                        <p class="text-sm font-medium text-slate-300">
                             Response window
                         </p>
                         <p class="mt-3 text-3xl font-semibold text-white">
                             Due today
                         </p>
-                        <p
-                            class="mt-2 text-sm text-slate-300"
-                        >
+                        <p class="mt-2 text-sm text-slate-300">
                             See follow-ups before they go cold and miss your
                             next opportunity.
                         </p>
@@ -188,17 +182,13 @@ const isAuthenticated = computed(() => page.props.auth.user !== null);
                     <div
                         class="rounded-[1.75rem] border border-white/10 bg-white/8 p-5 backdrop-blur"
                     >
-                        <p
-                            class="text-sm font-medium text-slate-300"
-                        >
+                        <p class="text-sm font-medium text-slate-300">
                             Cleaner handoff
                         </p>
                         <p class="mt-3 text-3xl font-semibold text-white">
                             Notes + status
                         </p>
-                        <p
-                            class="mt-2 text-sm text-slate-300"
-                        >
+                        <p class="mt-2 text-sm text-slate-300">
                             Keep context on every client so you always know what
                             was promised.
                         </p>
@@ -206,17 +196,13 @@ const isAuthenticated = computed(() => page.props.auth.user !== null);
                     <div
                         class="rounded-[1.75rem] border border-white/10 bg-white/8 p-5 backdrop-blur"
                     >
-                        <p
-                            class="text-sm font-medium text-slate-300"
-                        >
+                        <p class="text-sm font-medium text-slate-300">
                             Professional trust
                         </p>
                         <p class="mt-3 text-3xl font-semibold text-white">
                             Secure access
                         </p>
-                        <p
-                            class="mt-2 text-sm text-slate-300"
-                        >
+                        <p class="mt-2 text-sm text-slate-300">
                             Verified accounts and safer defaults built in from
                             day one.
                         </p>
