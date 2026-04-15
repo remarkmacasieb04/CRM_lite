@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { Head, Link, router } from '@inertiajs/vue3';
+import { ref } from 'vue';
 import PageHeader from '@/components/crm/PageHeader.vue';
 import StatusBadge from '@/components/crm/StatusBadge.vue';
 import { Button } from '@/components/ui/button';
@@ -18,7 +19,7 @@ type BoardClient = {
     updated_at: string | null;
 };
 
-defineProps<{
+const props = defineProps<{
     columns: Array<{
         value: string;
         label: string;
@@ -42,12 +43,105 @@ defineOptions({
     },
 });
 
+const draggedClientId = ref<number | null>(null);
+const draggedFromColumnValue = ref<string | null>(null);
+const dragOverColumnValue = ref<string | null>(null);
+
 const moveClient = (client: BoardClient, status: string) => {
     router.patch(
         clientStatusRoutes.update.url(client.id),
         { status },
         { preserveScroll: true },
     );
+};
+
+const handleDragStart = (
+    e: DragEvent,
+    clientId: number,
+    columnValue: string,
+) => {
+    draggedClientId.value = clientId;
+    draggedFromColumnValue.value = columnValue;
+    const target = e.currentTarget as HTMLElement;
+    if (e.dataTransfer) {
+        e.dataTransfer.effectAllowed = 'move';
+        e.dataTransfer.setData('text/plain', clientId.toString());
+    }
+    target.classList.add('opacity-50');
+};
+
+const handleDragEnd = (e: DragEvent) => {
+    const target = e.currentTarget as HTMLElement;
+    target.classList.remove('opacity-50');
+    draggedClientId.value = null;
+    draggedFromColumnValue.value = null;
+    dragOverColumnValue.value = null;
+};
+
+const handleDragOver = (e: DragEvent) => {
+    e.preventDefault();
+    if (e.dataTransfer) {
+        e.dataTransfer.dropEffect = 'move';
+    }
+};
+
+const handleDragEnter = (columnValue: string) => {
+    dragOverColumnValue.value = columnValue;
+};
+
+const handleDragLeave = (e: DragEvent) => {
+    const target = e.currentTarget as HTMLElement;
+    if (e.relatedTarget && !target.contains(e.relatedTarget as Node)) {
+        dragOverColumnValue.value = null;
+    }
+};
+
+const handleDrop = (
+    e: DragEvent,
+    targetColumnValue: string,
+    client: BoardClient,
+) => {
+    e.preventDefault();
+    e.stopPropagation();
+    dragOverColumnValue.value = null;
+
+    if (draggedClientId.value !== null && draggedClientId.value !== client.id) {
+        // If dropping on another client, use the target column
+        if (targetColumnValue !== draggedFromColumnValue.value) {
+            moveClient(
+                { ...client, id: draggedClientId.value } as BoardClient,
+                targetColumnValue,
+            );
+        }
+    } else if (
+        draggedClientId.value === client.id &&
+        targetColumnValue !== draggedFromColumnValue.value
+    ) {
+        // If dropping the same client in a different column
+        moveClient(client, targetColumnValue);
+    }
+};
+
+const handleDropOnEmptyArea = (e: DragEvent, targetColumnValue: string) => {
+    e.preventDefault();
+    e.stopPropagation();
+    dragOverColumnValue.value = null;
+
+    if (
+        draggedClientId.value !== null &&
+        targetColumnValue !== draggedFromColumnValue.value
+    ) {
+        // Find the dragged client and move it
+        for (const column of props.columns) {
+            const client = column.clients.find(
+                (c) => c.id === draggedClientId.value,
+            );
+            if (client) {
+                moveClient(client, targetColumnValue);
+                break;
+            }
+        }
+    }
 };
 </script>
 
@@ -72,6 +166,14 @@ const moveClient = (client: BoardClient, status: string) => {
                 v-for="column in columns"
                 :key="column.value"
                 class="crm-panel crm-panel-body flex min-h-[24rem] flex-col gap-4"
+                :class="{
+                    'ring-2 ring-emerald-400 dark:ring-emerald-500':
+                        dragOverColumnValue === column.value,
+                }"
+                @dragover="handleDragOver"
+                @dragenter="handleDragEnter(column.value)"
+                @dragleave="handleDragLeave"
+                @drop="handleDropOnEmptyArea($event, column.value)"
             >
                 <div class="flex items-center justify-between gap-3">
                     <div>
@@ -92,7 +194,18 @@ const moveClient = (client: BoardClient, status: string) => {
                     <div
                         v-for="client in column.clients"
                         :key="client.id"
-                        class="rounded-[1.4rem] border border-slate-200/80 bg-white/85 p-4 shadow-sm dark:border-slate-800 dark:bg-slate-950/65"
+                        draggable="true"
+                        class="rounded-[1.4rem] border border-slate-200/80 bg-white/85 p-4 shadow-sm transition-all dark:border-slate-800 dark:bg-slate-950/65"
+                        :class="{
+                            'cursor-move opacity-75 ring-2 ring-emerald-400 dark:ring-emerald-500':
+                                draggedClientId === client.id,
+                        }"
+                        @dragstart="
+                            handleDragStart($event, client.id, column.value)
+                        "
+                        @dragend="handleDragEnd"
+                        @dragover="handleDragOver"
+                        @drop="handleDrop($event, column.value, client)"
                     >
                         <div class="space-y-3">
                             <div>
