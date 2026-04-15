@@ -55,7 +55,11 @@ const moveClient = (client: BoardClient, status: string) => {
     );
 };
 
-const handleDragStart = (e: DragEvent, clientId: number, columnValue: string) => {
+const handleDragStart = (
+    e: DragEvent,
+    clientId: number,
+    columnValue: string,
+) => {
     draggedClientId.value = clientId;
     draggedFromColumnValue.value = columnValue;
     const target = e.currentTarget as HTMLElement;
@@ -92,7 +96,11 @@ const handleDragLeave = (e: DragEvent) => {
     }
 };
 
-const handleDrop = (e: DragEvent, targetColumnValue: string, client: BoardClient) => {
+const handleDrop = (
+    e: DragEvent,
+    targetColumnValue: string,
+    client: BoardClient,
+) => {
     e.preventDefault();
     e.stopPropagation();
     dragOverColumnValue.value = null;
@@ -105,7 +113,10 @@ const handleDrop = (e: DragEvent, targetColumnValue: string, client: BoardClient
                 targetColumnValue,
             );
         }
-    } else if (draggedClientId.value === client.id && targetColumnValue !== draggedFromColumnValue.value) {
+    } else if (
+        draggedClientId.value === client.id &&
+        targetColumnValue !== draggedFromColumnValue.value
+    ) {
         // If dropping the same client in a different column
         moveClient(client, targetColumnValue);
     }
@@ -189,7 +200,9 @@ const handleDropOnEmptyArea = (e: DragEvent, targetColumnValue: string) => {
                             'cursor-move opacity-75 ring-2 ring-emerald-400 dark:ring-emerald-500':
                                 draggedClientId === client.id,
                         }"
-                        @dragstart="handleDragStart($event, client.id, column.value)"
+                        @dragstart="
+                            handleDragStart($event, client.id, column.value)
+                        "
                         @dragend="handleDragEnd"
                         @dragover="handleDragOver"
                         @drop="handleDrop($event, column.value, client)"
