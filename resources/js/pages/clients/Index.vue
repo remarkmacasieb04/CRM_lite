@@ -158,11 +158,11 @@ const exportUrl = () =>
 const hasActiveFilters = computed(() =>
     Boolean(
         filters.search ||
-            filters.status ||
-            filters.archived ||
-            filters.tag ||
-            filters.follow_up ||
-            filters.stale,
+        filters.status ||
+        filters.archived ||
+        filters.tag ||
+        filters.follow_up ||
+        filters.stale,
     ),
 );
 
@@ -326,9 +326,7 @@ const deleteSavedView = (savedView: SavedClientView) => {
                 </Button>
 
                 <Button variant="outline" as-child class="px-5">
-                    <Link :href="board()">
-                        Board view
-                    </Link>
+                    <Link :href="board()"> Board view </Link>
                 </Button>
 
                 <Button as-child class="px-5">
@@ -344,7 +342,9 @@ const deleteSavedView = (savedView: SavedClientView) => {
             <section class="crm-panel crm-panel-body space-y-5">
                 <div class="flex items-center justify-between gap-3">
                     <div>
-                        <p class="text-sm font-medium text-slate-500 dark:text-slate-400">
+                        <p
+                            class="text-sm font-medium text-slate-500 dark:text-slate-400"
+                        >
                             Smart views
                         </p>
                         <h2
@@ -396,7 +396,9 @@ const deleteSavedView = (savedView: SavedClientView) => {
                     class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between"
                 >
                     <div>
-                        <p class="text-sm font-medium text-slate-500 dark:text-slate-400">
+                        <p
+                            class="text-sm font-medium text-slate-500 dark:text-slate-400"
+                        >
                             Saved views
                         </p>
                         <h2
@@ -663,9 +665,8 @@ const deleteSavedView = (savedView: SavedClientView) => {
                     type="checkbox"
                     class="size-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500"
                     @change="
-                        filters.stale = (
-                            $event.target as HTMLInputElement
-                        ).checked
+                        filters.stale = ($event.target as HTMLInputElement)
+                            .checked
                             ? 'yes'
                             : ''
                     "
@@ -701,9 +702,13 @@ const deleteSavedView = (savedView: SavedClientView) => {
                     <span class="self-center justify-self-start">Client</span>
                     <span class="self-center justify-self-start">Status</span>
                     <span class="self-center justify-self-start">Budget</span>
-                    <span class="self-center justify-self-start">Follow-up</span>
+                    <span class="self-center justify-self-start"
+                        >Follow-up</span
+                    >
                     <span class="self-center justify-self-start">Updated</span>
-                    <span class="self-center justify-self-end text-right">Actions</span>
+                    <span class="self-center justify-self-end text-right"
+                        >Actions</span
+                    >
                 </div>
 
                 <div
@@ -764,9 +769,7 @@ const deleteSavedView = (savedView: SavedClientView) => {
                     <div
                         class="flex min-w-0 items-center gap-2 self-center justify-self-start text-sm text-slate-600 dark:text-slate-300"
                     >
-                        <CalendarClock
-                            class="size-4 shrink-0 text-slate-400"
-                        />
+                        <CalendarClock class="size-4 shrink-0 text-slate-400" />
                         <span class="truncate">{{
                             formatDate(client.follow_up_at)
                         }}</span>
@@ -809,9 +812,7 @@ const deleteSavedView = (savedView: SavedClientView) => {
                     "
                 >
                     <Button
-                        v-if="
-                            hasActiveFilters
-                        "
+                        v-if="hasActiveFilters"
                         variant="outline"
                         @click="clearFilters"
                     >

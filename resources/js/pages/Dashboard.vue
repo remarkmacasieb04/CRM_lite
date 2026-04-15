@@ -320,7 +320,8 @@ defineProps<{
                 <CardHeader>
                     <CardTitle class="text-xl">Upcoming tasks</CardTitle>
                     <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">
-                        Work that still needs to move before the client relationship stalls.
+                        Work that still needs to move before the client
+                        relationship stalls.
                     </p>
                 </CardHeader>
                 <CardContent>
@@ -332,24 +333,56 @@ defineProps<{
                         >
                             <div class="flex items-start justify-between gap-3">
                                 <div class="space-y-2">
-                                    <div class="flex flex-wrap items-center gap-2">
-                                        <p class="font-semibold text-slate-950 dark:text-white">
+                                    <div
+                                        class="flex flex-wrap items-center gap-2"
+                                    >
+                                        <p
+                                            class="font-semibold text-slate-950 dark:text-white"
+                                        >
                                             {{ task.title }}
                                         </p>
-                                        <span class="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-600 dark:bg-slate-800 dark:text-slate-300">
-                                            {{ task.priority_label || 'Priority' }}
+                                        <span
+                                            class="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-600 dark:bg-slate-800 dark:text-slate-300"
+                                        >
+                                            {{
+                                                task.priority_label ||
+                                                'Priority'
+                                            }}
                                         </span>
                                     </div>
-                                    <p v-if="task.description" class="text-sm text-slate-600 dark:text-slate-300">
+                                    <p
+                                        v-if="task.description"
+                                        class="text-sm text-slate-600 dark:text-slate-300"
+                                    >
                                         {{ task.description }}
                                     </p>
-                                    <div class="flex flex-wrap gap-4 text-sm text-slate-500 dark:text-slate-400">
-                                        <span>Client {{ task.client.name || 'General task' }}</span>
-                                        <span>Due {{ formatDate(task.due_at) }}</span>
-                                        <span>Assignee {{ task.assignee.name || 'Unassigned' }}</span>
+                                    <div
+                                        class="flex flex-wrap gap-4 text-sm text-slate-500 dark:text-slate-400"
+                                    >
+                                        <span
+                                            >Client
+                                            {{
+                                                task.client.name ||
+                                                'General task'
+                                            }}</span
+                                        >
+                                        <span
+                                            >Due
+                                            {{ formatDate(task.due_at) }}</span
+                                        >
+                                        <span
+                                            >Assignee
+                                            {{
+                                                task.assignee.name ||
+                                                'Unassigned'
+                                            }}</span
+                                        >
                                     </div>
                                 </div>
-                                <StatusBadge :status="task.status" :label="task.status_label" />
+                                <StatusBadge
+                                    :status="task.status"
+                                    :label="task.status_label"
+                                />
                             </div>
                         </div>
                     </div>
@@ -366,11 +399,15 @@ defineProps<{
                 <CardHeader>
                     <CardTitle class="text-xl">Recent communications</CardTitle>
                     <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">
-                        A lightweight communication log so you can see the latest outreach at a glance.
+                        A lightweight communication log so you can see the
+                        latest outreach at a glance.
                     </p>
                 </CardHeader>
                 <CardContent>
-                    <div v-if="recentCommunications.length > 0" class="space-y-3">
+                    <div
+                        v-if="recentCommunications.length > 0"
+                        class="space-y-3"
+                    >
                         <div
                             v-for="communication in recentCommunications"
                             :key="communication.id"
@@ -378,27 +415,55 @@ defineProps<{
                         >
                             <div class="flex items-start justify-between gap-3">
                                 <div class="space-y-2">
-                                    <div class="flex flex-wrap items-center gap-2">
-                                        <p class="font-semibold text-slate-950 dark:text-white">
-                                            {{ communication.client?.name || 'Unknown client' }}
+                                    <div
+                                        class="flex flex-wrap items-center gap-2"
+                                    >
+                                        <p
+                                            class="font-semibold text-slate-950 dark:text-white"
+                                        >
+                                            {{
+                                                communication.client?.name ||
+                                                'Unknown client'
+                                            }}
                                         </p>
-                                        <span class="rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-200">
-                                            {{ communication.channel_label || 'Touchpoint' }}
+                                        <span
+                                            class="rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-200"
+                                        >
+                                            {{
+                                                communication.channel_label ||
+                                                'Touchpoint'
+                                            }}
                                         </span>
-                                        <span class="text-xs font-semibold tracking-[0.16em] text-slate-400 uppercase">
-                                            {{ communication.direction_label || 'Logged' }}
+                                        <span
+                                            class="text-xs font-semibold tracking-[0.16em] text-slate-400 uppercase"
+                                        >
+                                            {{
+                                                communication.direction_label ||
+                                                'Logged'
+                                            }}
                                         </span>
                                     </div>
-                                    <p v-if="communication.subject" class="text-sm font-medium text-slate-700 dark:text-slate-200">
+                                    <p
+                                        v-if="communication.subject"
+                                        class="text-sm font-medium text-slate-700 dark:text-slate-200"
+                                    >
                                         {{ communication.subject }}
                                     </p>
-                                    <p class="text-sm text-slate-600 dark:text-slate-300">
+                                    <p
+                                        class="text-sm text-slate-600 dark:text-slate-300"
+                                    >
                                         {{ communication.summary }}
                                     </p>
                                 </div>
-                                <div class="flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400">
+                                <div
+                                    class="flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400"
+                                >
                                     <MessageCircleMore class="size-4" />
-                                    {{ formatDateTime(communication.happened_at) }}
+                                    {{
+                                        formatDateTime(
+                                            communication.happened_at,
+                                        )
+                                    }}
                                 </div>
                             </div>
                         </div>

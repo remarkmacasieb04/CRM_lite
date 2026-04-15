@@ -36,9 +36,7 @@ defineProps<{
                 :href="home()"
                 class="relative z-20 inline-flex w-fit items-center gap-4 rounded-3xl border border-white/10 bg-white/8 px-4 py-3 text-left text-lg font-semibold shadow-lg shadow-slate-950/20 backdrop-blur-md"
             >
-                <div
-                    class="rounded-2xl bg-white/12 p-2.5 ring-1 ring-white/10"
-                >
+                <div class="rounded-2xl bg-white/12 p-2.5 ring-1 ring-white/10">
                     <AppLogoIcon class="size-9 rounded-xl" />
                 </div>
                 <div>
@@ -51,7 +49,7 @@ defineProps<{
                 </div>
             </Link>
 
-            <br>
+            <br />
 
             <div class="relative z-20 mt-16 max-w-2xl xl:mt-auto">
                 <span
@@ -65,9 +63,7 @@ defineProps<{
                     Keep clients moving without turning your workflow into
                     chaos.
                 </h1>
-                <p
-                    class="mt-6 max-w-2xl text-lg leading-8 text-slate-300/95"
-                >
+                <p class="mt-6 max-w-2xl text-lg leading-8 text-slate-300/95">
                     CRM Lite gives solo operators a calm, fast home for leads,
                     follow-ups, notes, and account activity with the polish of a
                     modern SaaS product.
@@ -93,7 +89,9 @@ defineProps<{
                     <div
                         class="flex items-start gap-4 rounded-3xl border border-white/10 bg-white/6 px-5 py-4 shadow-lg shadow-slate-950/15 backdrop-blur"
                     >
-                        <Sparkles class="mt-0.5 size-5 shrink-0 text-cyan-300" />
+                        <Sparkles
+                            class="mt-0.5 size-5 shrink-0 text-cyan-300"
+                        />
                         <div>
                             <p class="text-base font-semibold text-white">
                                 Smooth onboarding
@@ -107,7 +105,9 @@ defineProps<{
                     <div
                         class="flex items-start gap-4 rounded-3xl border border-white/10 bg-white/6 px-5 py-4 shadow-lg shadow-slate-950/15 backdrop-blur"
                     >
-                        <ShieldCheck class="mt-0.5 size-5 shrink-0 text-sky-300" />
+                        <ShieldCheck
+                            class="mt-0.5 size-5 shrink-0 text-sky-300"
+                        />
                         <div>
                             <p class="text-base font-semibold text-white">
                                 Safer defaults
@@ -132,7 +132,9 @@ defineProps<{
                         :href="home()"
                         class="mb-8 inline-flex items-center gap-3 text-left lg:hidden"
                     >
-                        <div class="rounded-2xl bg-slate-950 p-2 text-white dark:bg-white dark:text-slate-950">
+                        <div
+                            class="rounded-2xl bg-slate-950 p-2 text-white dark:bg-white dark:text-slate-950"
+                        >
                             <AppLogoIcon class="size-6 rounded-xl" />
                         </div>
                         <div>

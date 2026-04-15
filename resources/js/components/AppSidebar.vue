@@ -1,6 +1,12 @@
 <script setup lang="ts">
 import { Link, usePage } from '@inertiajs/vue3';
-import { CheckSquare, LayoutGrid, Settings, ShieldCheck, UsersRound } from 'lucide-vue-next';
+import {
+    CheckSquare,
+    LayoutGrid,
+    Settings,
+    ShieldCheck,
+    UsersRound,
+} from 'lucide-vue-next';
 import { computed } from 'vue';
 import AppLogo from '@/components/AppLogo.vue';
 import NavMain from '@/components/NavMain.vue';

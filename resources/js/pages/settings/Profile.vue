@@ -358,18 +358,26 @@ function disconnectProvider(providerName: string, label: string): void {
                         class="mt-1 size-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500"
                     />
                     <span class="space-y-1">
-                        <span class="block font-medium text-slate-950 dark:text-white">
+                        <span
+                            class="block font-medium text-slate-950 dark:text-white"
+                        >
                             Send me daily follow-up reminders
                         </span>
-                        <span class="block text-sm text-slate-500 dark:text-slate-400">
-                            Best for staying on top of overdue and upcoming follow-ups without logging in first.
+                        <span
+                            class="block text-sm text-slate-500 dark:text-slate-400"
+                        >
+                            Best for staying on top of overdue and upcoming
+                            follow-ups without logging in first.
                         </span>
                     </span>
                 </label>
 
                 <p class="text-sm text-slate-500 dark:text-slate-400">
                     Last digest sent:
-                    {{ user.last_follow_up_digest_sent_at || 'No digest has been sent yet.' }}
+                    {{
+                        user.last_follow_up_digest_sent_at ||
+                        'No digest has been sent yet.'
+                    }}
                 </p>
 
                 <Button

@@ -13,11 +13,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { formatDateTime } from '@/lib/formatters';
 import { destroy, index, store, toggle, update } from '@/routes/tasks';
-import type {
-    TaskItem,
-    TaskPriorityOption,
-    TaskStatusOption,
-} from '@/types';
+import type { TaskItem, TaskPriorityOption, TaskStatusOption } from '@/types';
 
 const props = defineProps<{
     tasks: TaskItem[];
@@ -47,7 +43,9 @@ defineOptions({
 const filters = reactive({
     status: props.filters.status ?? '',
     priority: props.filters.priority ?? '',
-    assigned_to: props.filters.assigned_to ? String(props.filters.assigned_to) : '',
+    assigned_to: props.filters.assigned_to
+        ? String(props.filters.assigned_to)
+        : '',
     client_id: props.filters.client_id ? String(props.filters.client_id) : '',
 });
 
@@ -85,7 +83,12 @@ const submitFilters = () => {
 };
 
 watchDebounced(
-    () => [filters.status, filters.priority, filters.assigned_to, filters.client_id],
+    () => [
+        filters.status,
+        filters.priority,
+        filters.assigned_to,
+        filters.client_id,
+    ],
     submitFilters,
     {
         debounce: 250,
@@ -154,11 +157,14 @@ const updateTaskStatus = (task: TaskItem, status: string) => {
         <div class="grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
             <section class="crm-panel crm-panel-body space-y-5">
                 <div>
-                    <h2 class="text-lg font-semibold text-slate-950 dark:text-white">
+                    <h2
+                        class="text-lg font-semibold text-slate-950 dark:text-white"
+                    >
                         Create a task
                     </h2>
                     <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">
-                        Great for follow-ups, proposals, revisions, or internal handoff work.
+                        Great for follow-ups, proposals, revisions, or internal
+                        handoff work.
                     </p>
                 </div>
 
@@ -166,21 +172,39 @@ const updateTaskStatus = (task: TaskItem, status: string) => {
                     <div class="grid gap-5 md:grid-cols-2">
                         <div class="grid gap-2 md:col-span-2">
                             <Label for="task-title">Title</Label>
-                            <Input id="task-title" v-model="form.title" class="h-11" placeholder="Send revised proposal" />
+                            <Input
+                                id="task-title"
+                                v-model="form.title"
+                                class="h-11"
+                                placeholder="Send revised proposal"
+                            />
                             <InputError :message="form.errors.title" />
                         </div>
 
                         <div class="grid gap-2 md:col-span-2">
                             <Label for="task-description">Description</Label>
-                            <Textarea id="task-description" v-model="form.description" rows="3" placeholder="Include updated scope, timeline, and payment schedule." />
+                            <Textarea
+                                id="task-description"
+                                v-model="form.description"
+                                rows="3"
+                                placeholder="Include updated scope, timeline, and payment schedule."
+                            />
                             <InputError :message="form.errors.description" />
                         </div>
 
                         <div class="grid gap-2">
                             <Label for="task-client">Client</Label>
-                            <select id="task-client" v-model="form.client_id" class="crm-field">
+                            <select
+                                id="task-client"
+                                v-model="form.client_id"
+                                class="crm-field"
+                            >
                                 <option value="">No client</option>
-                                <option v-for="client in clientOptions" :key="client.id" :value="String(client.id)">
+                                <option
+                                    v-for="client in clientOptions"
+                                    :key="client.id"
+                                    :value="String(client.id)"
+                                >
                                     {{ client.name }}
                                 </option>
                             </select>
@@ -189,19 +213,37 @@ const updateTaskStatus = (task: TaskItem, status: string) => {
 
                         <div class="grid gap-2">
                             <Label for="task-assignee">Assign to</Label>
-                            <select id="task-assignee" v-model="form.assigned_to_user_id" class="crm-field">
+                            <select
+                                id="task-assignee"
+                                v-model="form.assigned_to_user_id"
+                                class="crm-field"
+                            >
                                 <option value="">Unassigned</option>
-                                <option v-for="member in memberOptions" :key="member.id" :value="String(member.id)">
+                                <option
+                                    v-for="member in memberOptions"
+                                    :key="member.id"
+                                    :value="String(member.id)"
+                                >
                                     {{ member.name }}
                                 </option>
                             </select>
-                            <InputError :message="form.errors.assigned_to_user_id" />
+                            <InputError
+                                :message="form.errors.assigned_to_user_id"
+                            />
                         </div>
 
                         <div class="grid gap-2">
                             <Label for="task-status">Status</Label>
-                            <select id="task-status" v-model="form.status" class="crm-field">
-                                <option v-for="option in statusOptions" :key="option.value" :value="option.value">
+                            <select
+                                id="task-status"
+                                v-model="form.status"
+                                class="crm-field"
+                            >
+                                <option
+                                    v-for="option in statusOptions"
+                                    :key="option.value"
+                                    :value="option.value"
+                                >
                                     {{ option.label }}
                                 </option>
                             </select>
@@ -210,8 +252,16 @@ const updateTaskStatus = (task: TaskItem, status: string) => {
 
                         <div class="grid gap-2">
                             <Label for="task-priority">Priority</Label>
-                            <select id="task-priority" v-model="form.priority" class="crm-field">
-                                <option v-for="option in priorityOptions" :key="option.value" :value="option.value">
+                            <select
+                                id="task-priority"
+                                v-model="form.priority"
+                                class="crm-field"
+                            >
+                                <option
+                                    v-for="option in priorityOptions"
+                                    :key="option.value"
+                                    :value="option.value"
+                                >
                                     {{ option.label }}
                                 </option>
                             </select>
@@ -220,7 +270,12 @@ const updateTaskStatus = (task: TaskItem, status: string) => {
 
                         <div class="grid gap-2 md:col-span-2">
                             <Label for="task-due-at">Due date</Label>
-                            <Input id="task-due-at" v-model="form.due_at" type="date" class="h-11" />
+                            <Input
+                                id="task-due-at"
+                                v-model="form.due_at"
+                                type="date"
+                                class="h-11"
+                            />
                             <InputError :message="form.errors.due_at" />
                         </div>
                     </div>
@@ -231,7 +286,9 @@ const updateTaskStatus = (task: TaskItem, status: string) => {
 
             <section class="crm-panel crm-panel-body space-y-5">
                 <div>
-                    <h2 class="text-lg font-semibold text-slate-950 dark:text-white">
+                    <h2
+                        class="text-lg font-semibold text-slate-950 dark:text-white"
+                    >
                         Filter tasks
                     </h2>
                     <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">
@@ -242,9 +299,17 @@ const updateTaskStatus = (task: TaskItem, status: string) => {
                 <div class="grid gap-4">
                     <div class="grid gap-2">
                         <Label for="filter-status">Status</Label>
-                        <select id="filter-status" v-model="filters.status" class="crm-field">
+                        <select
+                            id="filter-status"
+                            v-model="filters.status"
+                            class="crm-field"
+                        >
                             <option value="">All statuses</option>
-                            <option v-for="option in statusOptions" :key="option.value" :value="option.value">
+                            <option
+                                v-for="option in statusOptions"
+                                :key="option.value"
+                                :value="option.value"
+                            >
                                 {{ option.label }}
                             </option>
                         </select>
@@ -252,9 +317,17 @@ const updateTaskStatus = (task: TaskItem, status: string) => {
 
                     <div class="grid gap-2">
                         <Label for="filter-priority">Priority</Label>
-                        <select id="filter-priority" v-model="filters.priority" class="crm-field">
+                        <select
+                            id="filter-priority"
+                            v-model="filters.priority"
+                            class="crm-field"
+                        >
                             <option value="">All priorities</option>
-                            <option v-for="option in priorityOptions" :key="option.value" :value="option.value">
+                            <option
+                                v-for="option in priorityOptions"
+                                :key="option.value"
+                                :value="option.value"
+                            >
                                 {{ option.label }}
                             </option>
                         </select>
@@ -262,9 +335,17 @@ const updateTaskStatus = (task: TaskItem, status: string) => {
 
                     <div class="grid gap-2">
                         <Label for="filter-assignee">Assignee</Label>
-                        <select id="filter-assignee" v-model="filters.assigned_to" class="crm-field">
+                        <select
+                            id="filter-assignee"
+                            v-model="filters.assigned_to"
+                            class="crm-field"
+                        >
                             <option value="">Anyone</option>
-                            <option v-for="member in memberOptions" :key="member.id" :value="String(member.id)">
+                            <option
+                                v-for="member in memberOptions"
+                                :key="member.id"
+                                :value="String(member.id)"
+                            >
                                 {{ member.name }}
                             </option>
                         </select>
@@ -272,9 +353,17 @@ const updateTaskStatus = (task: TaskItem, status: string) => {
 
                     <div class="grid gap-2">
                         <Label for="filter-client">Client</Label>
-                        <select id="filter-client" v-model="filters.client_id" class="crm-field">
+                        <select
+                            id="filter-client"
+                            v-model="filters.client_id"
+                            class="crm-field"
+                        >
                             <option value="">Any client</option>
-                            <option v-for="client in clientOptions" :key="client.id" :value="String(client.id)">
+                            <option
+                                v-for="client in clientOptions"
+                                :key="client.id"
+                                :value="String(client.id)"
+                            >
                                 {{ client.name }}
                             </option>
                         </select>
@@ -303,34 +392,66 @@ const updateTaskStatus = (task: TaskItem, status: string) => {
                 v-if="tasks.length > 0"
                 class="divide-y divide-slate-200/70 dark:divide-slate-800"
             >
-                <div v-for="task in tasks" :key="task.id" class="px-5 py-5 sm:px-6">
-                    <div class="grid gap-5 xl:grid-cols-[minmax(0,1fr)_minmax(17rem,22rem)]">
+                <div
+                    v-for="task in tasks"
+                    :key="task.id"
+                    class="px-5 py-5 sm:px-6"
+                >
+                    <div
+                        class="grid gap-5 xl:grid-cols-[minmax(0,1fr)_minmax(17rem,22rem)]"
+                    >
                         <div class="min-w-0 space-y-3">
                             <div class="flex flex-wrap items-center gap-3">
                                 <p
-                                    class="break-words text-lg font-semibold text-slate-950 dark:text-white"
+                                    class="text-lg font-semibold break-words text-slate-950 dark:text-white"
                                 >
                                     {{ task.title }}
                                 </p>
-                                <UserRoleBadge :role="task.priority" :label="task.priority_label" />
-                                <UserRoleBadge :role="task.status === 'done' ? 'admin' : 'user'" :label="task.status_label" />
+                                <UserRoleBadge
+                                    :role="task.priority"
+                                    :label="task.priority_label"
+                                />
+                                <UserRoleBadge
+                                    :role="
+                                        task.status === 'done'
+                                            ? 'admin'
+                                            : 'user'
+                                    "
+                                    :label="task.status_label"
+                                />
                             </div>
-                            <p v-if="task.description" class="text-sm leading-6 text-slate-600 dark:text-slate-300">
+                            <p
+                                v-if="task.description"
+                                class="text-sm leading-6 text-slate-600 dark:text-slate-300"
+                            >
                                 {{ task.description }}
                             </p>
                             <div
                                 class="grid gap-2 text-sm text-slate-500 sm:grid-cols-2 dark:text-slate-400"
                             >
-                                <span v-if="task.client.name" class="min-w-0 break-words">
+                                <span
+                                    v-if="task.client.name"
+                                    class="min-w-0 break-words"
+                                >
                                     Client: {{ task.client.name }}
                                 </span>
                                 <span class="min-w-0 break-words">
-                                    Assignee: {{ task.assignee.name || 'Unassigned' }}
+                                    Assignee:
+                                    {{ task.assignee.name || 'Unassigned' }}
                                 </span>
                                 <span class="min-w-0 break-words">
-                                    Created by: {{ task.creator.name || 'Unknown' }}
+                                    Created by:
+                                    {{ task.creator.name || 'Unknown' }}
                                 </span>
-                                <span>Due: {{ formatDateTime(task.due_at, 'Not scheduled') }}</span>
+                                <span
+                                    >Due:
+                                    {{
+                                        formatDateTime(
+                                            task.due_at,
+                                            'Not scheduled',
+                                        )
+                                    }}</span
+                                >
                             </div>
                         </div>
 
@@ -343,15 +464,29 @@ const updateTaskStatus = (task: TaskItem, status: string) => {
                                 class="justify-center"
                                 @click="toggleTask(task.id)"
                             >
-                                {{ task.status === 'done' ? 'Reopen' : 'Mark done' }}
+                                {{
+                                    task.status === 'done'
+                                        ? 'Reopen'
+                                        : 'Mark done'
+                                }}
                             </Button>
 
                             <select
                                 class="crm-compact-select"
                                 :value="task.status ?? 'todo'"
-                                @change="updateTaskStatus(task, ($event.target as HTMLSelectElement).value)"
+                                @change="
+                                    updateTaskStatus(
+                                        task,
+                                        ($event.target as HTMLSelectElement)
+                                            .value,
+                                    )
+                                "
                             >
-                                <option v-for="option in statusOptions" :key="option.value" :value="option.value">
+                                <option
+                                    v-for="option in statusOptions"
+                                    :key="option.value"
+                                    :value="option.value"
+                                >
                                     {{ option.label }}
                                 </option>
                             </select>

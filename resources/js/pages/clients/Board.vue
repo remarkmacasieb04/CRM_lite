@@ -4,11 +4,7 @@ import PageHeader from '@/components/crm/PageHeader.vue';
 import StatusBadge from '@/components/crm/StatusBadge.vue';
 import { Button } from '@/components/ui/button';
 import { formatDate, formatRelativeTime } from '@/lib/formatters';
-import {
-    board,
-    index,
-    show as showClient,
-} from '@/routes/clients';
+import { board, index, show as showClient } from '@/routes/clients';
 import clientStatusRoutes from '@/routes/clients/status';
 import type { ClientStatusOption } from '@/types';
 
@@ -79,7 +75,9 @@ const moveClient = (client: BoardClient, status: string) => {
             >
                 <div class="flex items-center justify-between gap-3">
                     <div>
-                        <h2 class="text-lg font-semibold text-slate-950 dark:text-white">
+                        <h2
+                            class="text-lg font-semibold text-slate-950 dark:text-white"
+                        >
                             {{ column.label }}
                         </h2>
                         <p class="text-sm text-slate-500 dark:text-slate-400">
@@ -104,7 +102,9 @@ const moveClient = (client: BoardClient, status: string) => {
                                 >
                                     {{ client.name }}
                                 </Link>
-                                <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">
+                                <p
+                                    class="mt-1 text-sm text-slate-500 dark:text-slate-400"
+                                >
                                     {{ client.company || 'Independent client' }}
                                 </p>
                             </div>
@@ -114,19 +114,35 @@ const moveClient = (client: BoardClient, status: string) => {
                                 :label="client.status_label"
                             />
 
-                            <div class="space-y-1 text-sm text-slate-500 dark:text-slate-400">
-                                <p>Follow-up: {{ formatDate(client.follow_up_at) }}</p>
-                                <p>Updated {{ formatRelativeTime(client.updated_at) }}</p>
+                            <div
+                                class="space-y-1 text-sm text-slate-500 dark:text-slate-400"
+                            >
+                                <p>
+                                    Follow-up:
+                                    {{ formatDate(client.follow_up_at) }}
+                                </p>
+                                <p>
+                                    Updated
+                                    {{ formatRelativeTime(client.updated_at) }}
+                                </p>
                             </div>
 
                             <div class="grid gap-2">
-                                <label class="text-xs font-semibold tracking-[0.14em] text-slate-400 uppercase">
+                                <label
+                                    class="text-xs font-semibold tracking-[0.14em] text-slate-400 uppercase"
+                                >
                                     Move to
                                 </label>
                                 <select
                                     class="crm-field"
                                     :value="client.status ?? column.value"
-                                    @change="moveClient(client, ($event.target as HTMLSelectElement).value)"
+                                    @change="
+                                        moveClient(
+                                            client,
+                                            ($event.target as HTMLSelectElement)
+                                                .value,
+                                        )
+                                    "
                                 >
                                     <option
                                         v-for="option in statusOptions"

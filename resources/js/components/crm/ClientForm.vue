@@ -166,8 +166,7 @@ const submit = () => {
                 </datalist>
                 <p class="text-sm text-slate-500 dark:text-slate-400">
                     Separate tags with commas so you can build flexible filters
-                    like <strong>Referral</strong> or
-                    <strong>Urgent</strong>.
+                    like <strong>Referral</strong> or <strong>Urgent</strong>.
                 </p>
                 <InputError :message="form.errors.tags" />
             </div>

@@ -60,7 +60,11 @@ import communications from '@/routes/clients/communications';
 import documents from '@/routes/clients/documents';
 import notes from '@/routes/clients/notes';
 import portalShare from '@/routes/clients/portal-share';
-import { destroy as destroyTask, store as storeTask, toggle as toggleTask } from '@/routes/tasks';
+import {
+    destroy as destroyTask,
+    store as storeTask,
+    toggle as toggleTask,
+} from '@/routes/tasks';
 import type {
     ClientDetail,
     CommunicationChannelOption,
@@ -201,19 +205,22 @@ const submitAttachment = () => {
 };
 
 const submitTask = () => {
-    taskForm.transform((data) => ({
-        ...data,
-        assigned_to_user_id: data.assigned_to_user_id || null,
-        due_at: data.due_at || null,
-    })).post(storeTask.url(), {
-        preserveScroll: true,
-        onSuccess: () => {
-            taskForm.reset();
-            taskForm.client_id = String(props.client.id);
-            taskForm.status = props.taskStatusOptions[0]?.value ?? 'todo';
-            taskForm.priority = props.taskPriorityOptions[1]?.value ?? 'medium';
-        },
-    });
+    taskForm
+        .transform((data) => ({
+            ...data,
+            assigned_to_user_id: data.assigned_to_user_id || null,
+            due_at: data.due_at || null,
+        }))
+        .post(storeTask.url(), {
+            preserveScroll: true,
+            onSuccess: () => {
+                taskForm.reset();
+                taskForm.client_id = String(props.client.id);
+                taskForm.status = props.taskStatusOptions[0]?.value ?? 'todo';
+                taskForm.priority =
+                    props.taskPriorityOptions[1]?.value ?? 'medium';
+            },
+        });
 };
 
 const submitCommunication = () => {
@@ -221,28 +228,34 @@ const submitCommunication = () => {
         preserveScroll: true,
         onSuccess: () => {
             communicationForm.reset();
-            communicationForm.channel = props.communicationChannelOptions[0]?.value ?? 'email';
-            communicationForm.direction = props.communicationDirectionOptions[0]?.value ?? 'outbound';
+            communicationForm.channel =
+                props.communicationChannelOptions[0]?.value ?? 'email';
+            communicationForm.direction =
+                props.communicationDirectionOptions[0]?.value ?? 'outbound';
         },
     });
 };
 
 const submitDocument = () => {
-    documentForm.transform((data) => ({
-        ...data,
-        amount: data.amount || null,
-        issued_at: data.issued_at || null,
-        due_at: data.due_at || null,
-    })).post(documents.store.url(props.client.id), {
-        preserveScroll: true,
-        onSuccess: () => {
-            documentForm.reset();
-            documentForm.type = props.documentTypeOptions[0]?.value ?? 'proposal';
-            documentForm.status = props.documentStatusOptions[0]?.value ?? 'draft';
-            documentForm.currency = 'USD';
-            documentForm.is_portal_visible = true;
-        },
-    });
+    documentForm
+        .transform((data) => ({
+            ...data,
+            amount: data.amount || null,
+            issued_at: data.issued_at || null,
+            due_at: data.due_at || null,
+        }))
+        .post(documents.store.url(props.client.id), {
+            preserveScroll: true,
+            onSuccess: () => {
+                documentForm.reset();
+                documentForm.type =
+                    props.documentTypeOptions[0]?.value ?? 'proposal';
+                documentForm.status =
+                    props.documentStatusOptions[0]?.value ?? 'draft';
+                documentForm.currency = 'USD';
+                documentForm.is_portal_visible = true;
+            },
+        });
 };
 
 const archiveClient = () => {
@@ -284,12 +297,15 @@ const confirmDeleteAttachment = () => {
         return;
     }
 
-    attachmentDeleteForm.delete(attachments.destroy.url(pendingAttachment.value.id), {
-        preserveScroll: true,
-        onFinish: () => {
-            pendingAttachment.value = null;
+    attachmentDeleteForm.delete(
+        attachments.destroy.url(pendingAttachment.value.id),
+        {
+            preserveScroll: true,
+            onFinish: () => {
+                pendingAttachment.value = null;
+            },
         },
-    });
+    );
 };
 
 const toggleClientTask = (taskId: number) => {
@@ -355,12 +371,15 @@ const revokePortalShare = () => {
         return;
     }
 
-    portalRevokeForm.delete(portalShare.destroy.url(props.client.portal_share.id), {
-        preserveScroll: true,
-        onFinish: () => {
-            portalRevokeDialogOpen.value = false;
+    portalRevokeForm.delete(
+        portalShare.destroy.url(props.client.portal_share.id),
+        {
+            preserveScroll: true,
+            onFinish: () => {
+                portalRevokeDialogOpen.value = false;
+            },
         },
-    });
+    );
 };
 
 const copyPortalLink = async () => {
@@ -550,7 +569,10 @@ const copyPortalLink = async () => {
                         <CardTitle class="text-xl">Tasks</CardTitle>
                     </CardHeader>
                     <CardContent class="space-y-5">
-                        <form class="crm-subtle-panel space-y-3" @submit.prevent="submitTask">
+                        <form
+                            class="crm-subtle-panel space-y-3"
+                            @submit.prevent="submitTask"
+                        >
                             <label
                                 for="task-title"
                                 class="text-sm font-medium text-slate-700 dark:text-slate-200"
@@ -569,9 +591,14 @@ const copyPortalLink = async () => {
                                 rows="3"
                                 placeholder="Capture the next clear action for this client."
                             />
-                            <InputError :message="taskForm.errors.description" />
+                            <InputError
+                                :message="taskForm.errors.description"
+                            />
                             <div class="grid gap-3 md:grid-cols-3">
-                                <select v-model="taskForm.status" class="crm-field">
+                                <select
+                                    v-model="taskForm.status"
+                                    class="crm-field"
+                                >
                                     <option
                                         v-for="option in taskStatusOptions"
                                         :key="option.value"
@@ -580,7 +607,10 @@ const copyPortalLink = async () => {
                                         {{ option.label }}
                                     </option>
                                 </select>
-                                <select v-model="taskForm.priority" class="crm-field">
+                                <select
+                                    v-model="taskForm.priority"
+                                    class="crm-field"
+                                >
                                     <option
                                         v-for="option in taskPriorityOptions"
                                         :key="option.value"
@@ -589,10 +619,17 @@ const copyPortalLink = async () => {
                                         {{ option.label }}
                                     </option>
                                 </select>
-                                <Input v-model="taskForm.due_at" type="date" class="h-11" />
+                                <Input
+                                    v-model="taskForm.due_at"
+                                    type="date"
+                                    class="h-11"
+                                />
                             </div>
                             <div class="flex justify-end">
-                                <Button type="submit" :disabled="taskForm.processing">
+                                <Button
+                                    type="submit"
+                                    :disabled="taskForm.processing"
+                                >
                                     <CheckSquare class="size-4" />
                                     Create task
                                 </Button>
@@ -609,37 +646,74 @@ const copyPortalLink = async () => {
                                     class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between"
                                 >
                                     <div class="min-w-0 space-y-2">
-                                        <div class="flex flex-wrap items-center gap-2">
+                                        <div
+                                            class="flex flex-wrap items-center gap-2"
+                                        >
                                             <p
-                                                class="break-words font-semibold text-slate-950 dark:text-white"
+                                                class="font-semibold break-words text-slate-950 dark:text-white"
                                             >
                                                 {{ task.title }}
                                             </p>
-                                            <span class="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-600 dark:bg-slate-800 dark:text-slate-300">
+                                            <span
+                                                class="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-600 dark:bg-slate-800 dark:text-slate-300"
+                                            >
                                                 {{ task.priority_label }}
                                             </span>
-                                            <span class="rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-200">
+                                            <span
+                                                class="rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-200"
+                                            >
                                                 {{ task.status_label }}
                                             </span>
                                         </div>
-                                        <p v-if="task.description" class="text-sm text-slate-600 dark:text-slate-300">
+                                        <p
+                                            v-if="task.description"
+                                            class="text-sm text-slate-600 dark:text-slate-300"
+                                        >
                                             {{ task.description }}
                                         </p>
-                                        <div class="flex flex-wrap gap-4 text-sm text-slate-500 dark:text-slate-400">
-                                            <span>Due {{ formatDate(task.due_at) }}</span>
-                                            <span>Assigned {{ task.assignee.name || 'Unassigned' }}</span>
+                                        <div
+                                            class="flex flex-wrap gap-4 text-sm text-slate-500 dark:text-slate-400"
+                                        >
+                                            <span
+                                                >Due
+                                                {{
+                                                    formatDate(task.due_at)
+                                                }}</span
+                                            >
+                                            <span
+                                                >Assigned
+                                                {{
+                                                    task.assignee.name ||
+                                                    'Unassigned'
+                                                }}</span
+                                            >
                                         </div>
                                     </div>
-                                    <div class="flex shrink-0 items-center gap-2">
-                                        <Button variant="outline" size="sm" @click="toggleClientTask(task.id)">
-                                            {{ task.completed_at ? 'Reopen' : 'Complete' }}
+                                    <div
+                                        class="flex shrink-0 items-center gap-2"
+                                    >
+                                        <Button
+                                            variant="outline"
+                                            size="sm"
+                                            @click="toggleClientTask(task.id)"
+                                        >
+                                            {{
+                                                task.completed_at
+                                                    ? 'Reopen'
+                                                    : 'Complete'
+                                            }}
                                         </Button>
                                         <Button
                                             variant="outline"
                                             size="icon"
                                             :title="`Delete ${task.title}`"
                                             :aria-label="`Delete ${task.title}`"
-                                            @click="deleteClientTask(task.id, task.title)"
+                                            @click="
+                                                deleteClientTask(
+                                                    task.id,
+                                                    task.title,
+                                                )
+                                            "
                                         >
                                             <Trash2 class="size-4" />
                                         </Button>
@@ -731,12 +805,20 @@ const copyPortalLink = async () => {
                         <CardTitle class="text-xl">Communication log</CardTitle>
                     </CardHeader>
                     <CardContent class="space-y-5">
-                        <form class="crm-subtle-panel space-y-3" @submit.prevent="submitCommunication">
-                            <label class="text-sm font-medium text-slate-700 dark:text-slate-200">
+                        <form
+                            class="crm-subtle-panel space-y-3"
+                            @submit.prevent="submitCommunication"
+                        >
+                            <label
+                                class="text-sm font-medium text-slate-700 dark:text-slate-200"
+                            >
                                 Log a touchpoint
                             </label>
                             <div class="grid gap-3 md:grid-cols-2">
-                                <select v-model="communicationForm.channel" class="crm-field">
+                                <select
+                                    v-model="communicationForm.channel"
+                                    class="crm-field"
+                                >
                                     <option
                                         v-for="option in communicationChannelOptions"
                                         :key="option.value"
@@ -745,7 +827,10 @@ const copyPortalLink = async () => {
                                         {{ option.label }}
                                     </option>
                                 </select>
-                                <select v-model="communicationForm.direction" class="crm-field">
+                                <select
+                                    v-model="communicationForm.direction"
+                                    class="crm-field"
+                                >
                                     <option
                                         v-for="option in communicationDirectionOptions"
                                         :key="option.value"
@@ -765,41 +850,76 @@ const copyPortalLink = async () => {
                                 rows="3"
                                 placeholder="Summarize what happened, what the client asked for, and the next step."
                             />
-                            <Input v-model="communicationForm.happened_at" type="datetime-local" class="h-11" />
-                            <InputError :message="communicationForm.errors.summary" />
+                            <Input
+                                v-model="communicationForm.happened_at"
+                                type="datetime-local"
+                                class="h-11"
+                            />
+                            <InputError
+                                :message="communicationForm.errors.summary"
+                            />
                             <div class="flex justify-end">
-                                <Button type="submit" :disabled="communicationForm.processing">
+                                <Button
+                                    type="submit"
+                                    :disabled="communicationForm.processing"
+                                >
                                     <MessageCircleMore class="size-4" />
                                     Log communication
                                 </Button>
                             </div>
                         </form>
 
-                        <div v-if="client.communications.length > 0" class="space-y-3">
+                        <div
+                            v-if="client.communications.length > 0"
+                            class="space-y-3"
+                        >
                             <div
                                 v-for="communication in client.communications"
                                 :key="communication.id"
                                 class="crm-list-item"
                             >
-                                <div class="flex items-start justify-between gap-3">
+                                <div
+                                    class="flex items-start justify-between gap-3"
+                                >
                                     <div class="space-y-2">
-                                        <div class="flex flex-wrap items-center gap-2">
-                                            <span class="rounded-full bg-sky-50 px-3 py-1 text-xs font-semibold text-sky-700 dark:bg-sky-500/10 dark:text-sky-200">
-                                                {{ communication.channel_label }}
+                                        <div
+                                            class="flex flex-wrap items-center gap-2"
+                                        >
+                                            <span
+                                                class="rounded-full bg-sky-50 px-3 py-1 text-xs font-semibold text-sky-700 dark:bg-sky-500/10 dark:text-sky-200"
+                                            >
+                                                {{
+                                                    communication.channel_label
+                                                }}
                                             </span>
-                                            <span class="text-xs font-semibold tracking-[0.16em] text-slate-400 uppercase">
-                                                {{ communication.direction_label }}
+                                            <span
+                                                class="text-xs font-semibold tracking-[0.16em] text-slate-400 uppercase"
+                                            >
+                                                {{
+                                                    communication.direction_label
+                                                }}
                                             </span>
                                         </div>
-                                        <p v-if="communication.subject" class="font-semibold text-slate-950 dark:text-white">
+                                        <p
+                                            v-if="communication.subject"
+                                            class="font-semibold text-slate-950 dark:text-white"
+                                        >
                                             {{ communication.subject }}
                                         </p>
-                                        <p class="text-sm text-slate-600 dark:text-slate-300">
+                                        <p
+                                            class="text-sm text-slate-600 dark:text-slate-300"
+                                        >
                                             {{ communication.summary }}
                                         </p>
                                     </div>
-                                    <p class="text-sm text-slate-500 dark:text-slate-400">
-                                        {{ formatDateTime(communication.happened_at) }}
+                                    <p
+                                        class="text-sm text-slate-500 dark:text-slate-400"
+                                    >
+                                        {{
+                                            formatDateTime(
+                                                communication.happened_at,
+                                            )
+                                        }}
                                     </p>
                                 </div>
                             </div>
@@ -816,15 +936,25 @@ const copyPortalLink = async () => {
 
                 <Card>
                     <CardHeader>
-                        <CardTitle class="text-xl">Proposals and invoices</CardTitle>
+                        <CardTitle class="text-xl"
+                            >Proposals and invoices</CardTitle
+                        >
                     </CardHeader>
                     <CardContent class="space-y-5">
-                        <form class="crm-subtle-panel space-y-3" @submit.prevent="submitDocument">
-                            <label class="text-sm font-medium text-slate-700 dark:text-slate-200">
+                        <form
+                            class="crm-subtle-panel space-y-3"
+                            @submit.prevent="submitDocument"
+                        >
+                            <label
+                                class="text-sm font-medium text-slate-700 dark:text-slate-200"
+                            >
                                 Add a business document
                             </label>
                             <div class="grid gap-3 md:grid-cols-2">
-                                <select v-model="documentForm.type" class="crm-field">
+                                <select
+                                    v-model="documentForm.type"
+                                    class="crm-field"
+                                >
                                     <option
                                         v-for="option in documentTypeOptions"
                                         :key="option.value"
@@ -833,7 +963,10 @@ const copyPortalLink = async () => {
                                         {{ option.label }}
                                     </option>
                                 </select>
-                                <select v-model="documentForm.status" class="crm-field">
+                                <select
+                                    v-model="documentForm.status"
+                                    class="crm-field"
+                                >
                                     <option
                                         v-for="option in documentStatusOptions"
                                         :key="option.value"
@@ -843,18 +976,48 @@ const copyPortalLink = async () => {
                                     </option>
                                 </select>
                             </div>
-                            <Input v-model="documentForm.title" class="h-11" placeholder="Website redesign proposal" />
+                            <Input
+                                v-model="documentForm.title"
+                                class="h-11"
+                                placeholder="Website redesign proposal"
+                            />
                             <div class="grid gap-3 md:grid-cols-3">
-                                <Input v-model="documentForm.amount" type="number" step="0.01" min="0" class="h-11" placeholder="1500.00" />
-                                <Input v-model="documentForm.currency" class="h-11" maxlength="3" placeholder="USD" />
-                                <label class="flex items-center gap-3 rounded-2xl border border-slate-200/80 px-4 py-3 text-sm text-slate-600 dark:border-slate-800 dark:text-slate-300">
-                                    <input v-model="documentForm.is_portal_visible" type="checkbox" class="rounded border-slate-300" />
+                                <Input
+                                    v-model="documentForm.amount"
+                                    type="number"
+                                    step="0.01"
+                                    min="0"
+                                    class="h-11"
+                                    placeholder="1500.00"
+                                />
+                                <Input
+                                    v-model="documentForm.currency"
+                                    class="h-11"
+                                    maxlength="3"
+                                    placeholder="USD"
+                                />
+                                <label
+                                    class="flex items-center gap-3 rounded-2xl border border-slate-200/80 px-4 py-3 text-sm text-slate-600 dark:border-slate-800 dark:text-slate-300"
+                                >
+                                    <input
+                                        v-model="documentForm.is_portal_visible"
+                                        type="checkbox"
+                                        class="rounded border-slate-300"
+                                    />
                                     Visible in client portal
                                 </label>
                             </div>
                             <div class="grid gap-3 md:grid-cols-2">
-                                <Input v-model="documentForm.issued_at" type="date" class="h-11" />
-                                <Input v-model="documentForm.due_at" type="date" class="h-11" />
+                                <Input
+                                    v-model="documentForm.issued_at"
+                                    type="date"
+                                    class="h-11"
+                                />
+                                <Input
+                                    v-model="documentForm.due_at"
+                                    type="date"
+                                    class="h-11"
+                                />
                             </div>
                             <Textarea
                                 v-model="documentForm.notes"
@@ -862,14 +1025,20 @@ const copyPortalLink = async () => {
                                 placeholder="Optional notes such as scope summary, payment terms, or approval context."
                             />
                             <div class="flex justify-end">
-                                <Button type="submit" :disabled="documentForm.processing">
+                                <Button
+                                    type="submit"
+                                    :disabled="documentForm.processing"
+                                >
                                     <FileText class="size-4" />
                                     Save document
                                 </Button>
                             </div>
                         </form>
 
-                        <div v-if="client.documents.length > 0" class="space-y-3">
+                        <div
+                            v-if="client.documents.length > 0"
+                            class="space-y-3"
+                        >
                             <div
                                 v-for="document in client.documents"
                                 :key="document.id"
@@ -879,31 +1048,70 @@ const copyPortalLink = async () => {
                                     class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between"
                                 >
                                     <div class="min-w-0 space-y-2">
-                                        <div class="flex flex-wrap items-center gap-2">
-                                            <span class="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-600 dark:bg-slate-800 dark:text-slate-300">
+                                        <div
+                                            class="flex flex-wrap items-center gap-2"
+                                        >
+                                            <span
+                                                class="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-600 dark:bg-slate-800 dark:text-slate-300"
+                                            >
                                                 {{ document.type_label }}
                                             </span>
                                             <p
-                                                class="break-words font-semibold text-slate-950 dark:text-white"
+                                                class="font-semibold break-words text-slate-950 dark:text-white"
                                             >
                                                 {{ document.title }}
                                             </p>
                                         </div>
-                                        <div class="flex flex-wrap gap-4 text-sm text-slate-500 dark:text-slate-400">
-                                            <span>{{ document.document_number }}</span>
-                                            <span>{{ document.currency }} {{ formatCurrency(document.amount) }}</span>
-                                            <span>Issued {{ formatDate(document.issued_at) }}</span>
-                                            <span>Due {{ formatDate(document.due_at) }}</span>
+                                        <div
+                                            class="flex flex-wrap gap-4 text-sm text-slate-500 dark:text-slate-400"
+                                        >
+                                            <span>{{
+                                                document.document_number
+                                            }}</span>
+                                            <span
+                                                >{{ document.currency }}
+                                                {{
+                                                    formatCurrency(
+                                                        document.amount,
+                                                    )
+                                                }}</span
+                                            >
+                                            <span
+                                                >Issued
+                                                {{
+                                                    formatDate(
+                                                        document.issued_at,
+                                                    )
+                                                }}</span
+                                            >
+                                            <span
+                                                >Due
+                                                {{
+                                                    formatDate(document.due_at)
+                                                }}</span
+                                            >
                                         </div>
-                                        <p v-if="document.notes" class="text-sm text-slate-600 dark:text-slate-300">
+                                        <p
+                                            v-if="document.notes"
+                                            class="text-sm text-slate-600 dark:text-slate-300"
+                                        >
                                             {{ document.notes }}
                                         </p>
                                     </div>
-                                    <div class="flex shrink-0 items-center gap-2">
+                                    <div
+                                        class="flex shrink-0 items-center gap-2"
+                                    >
                                         <select
                                             class="crm-compact-select"
                                             :value="document.status ?? 'draft'"
-                                            @change="updateDocumentStatus(document.id, ($event.target as HTMLSelectElement).value)"
+                                            @change="
+                                                updateDocumentStatus(
+                                                    document.id,
+                                                    (
+                                                        $event.target as HTMLSelectElement
+                                                    ).value,
+                                                )
+                                            "
                                         >
                                             <option
                                                 v-for="option in documentStatusOptions"
@@ -918,7 +1126,12 @@ const copyPortalLink = async () => {
                                             size="icon"
                                             :title="`Remove ${document.document_number}`"
                                             :aria-label="`Remove ${document.document_number}`"
-                                            @click="deleteDocument(document.id, document.document_number)"
+                                            @click="
+                                                deleteDocument(
+                                                    document.id,
+                                                    document.document_number,
+                                                )
+                                            "
                                         >
                                             <Trash2 class="size-4" />
                                         </Button>
@@ -944,31 +1157,76 @@ const copyPortalLink = async () => {
                     </CardHeader>
                     <CardContent class="space-y-4">
                         <div class="crm-subtle-panel space-y-3">
-                            <p class="text-sm text-slate-600 dark:text-slate-300">
-                                Generate a secure share link so the client can view their overview and any portal-visible proposals or invoices.
+                            <p
+                                class="text-sm text-slate-600 dark:text-slate-300"
+                            >
+                                Generate a secure share link so the client can
+                                view their overview and any portal-visible
+                                proposals or invoices.
                             </p>
 
                             <div v-if="client.portal_share" class="space-y-3">
-                                <div class="rounded-2xl border border-emerald-200/80 bg-emerald-50/80 p-4 dark:border-emerald-500/20 dark:bg-emerald-500/10">
-                                    <p class="text-sm font-semibold text-emerald-700 dark:text-emerald-200">
+                                <div
+                                    class="rounded-2xl border border-emerald-200/80 bg-emerald-50/80 p-4 dark:border-emerald-500/20 dark:bg-emerald-500/10"
+                                >
+                                    <p
+                                        class="text-sm font-semibold text-emerald-700 dark:text-emerald-200"
+                                    >
                                         Portal link is active
                                     </p>
-                                    <p class="mt-2 break-all text-sm text-slate-700 dark:text-slate-200">
+                                    <p
+                                        class="mt-2 text-sm break-all text-slate-700 dark:text-slate-200"
+                                    >
                                         {{ client.portal_share.portal_url }}
                                     </p>
-                                    <div class="mt-3 flex flex-wrap gap-3 text-sm text-slate-500 dark:text-slate-400">
-                                        <span>Created {{ formatDateTime(client.portal_share.created_at) }}</span>
-                                        <span>Expires {{ formatDateTime(client.portal_share.expires_at) }}</span>
-                                        <span>Last viewed {{ formatDateTime(client.portal_share.last_viewed_at) }}</span>
+                                    <div
+                                        class="mt-3 flex flex-wrap gap-3 text-sm text-slate-500 dark:text-slate-400"
+                                    >
+                                        <span
+                                            >Created
+                                            {{
+                                                formatDateTime(
+                                                    client.portal_share
+                                                        .created_at,
+                                                )
+                                            }}</span
+                                        >
+                                        <span
+                                            >Expires
+                                            {{
+                                                formatDateTime(
+                                                    client.portal_share
+                                                        .expires_at,
+                                                )
+                                            }}</span
+                                        >
+                                        <span
+                                            >Last viewed
+                                            {{
+                                                formatDateTime(
+                                                    client.portal_share
+                                                        .last_viewed_at,
+                                                )
+                                            }}</span
+                                        >
                                     </div>
                                 </div>
                                 <div class="flex flex-wrap gap-2">
-                                    <Button variant="outline" @click="copyPortalLink">
+                                    <Button
+                                        variant="outline"
+                                        @click="copyPortalLink"
+                                    >
                                         <ClipboardCopy class="size-4" />
                                         Copy link
                                     </Button>
                                     <Button variant="outline" as-child>
-                                        <a :href="client.portal_share.portal_url" target="_blank" rel="noreferrer">
+                                        <a
+                                            :href="
+                                                client.portal_share.portal_url
+                                            "
+                                            target="_blank"
+                                            rel="noreferrer"
+                                        >
                                             <Globe class="size-4" />
                                             Open portal
                                         </a>
@@ -983,7 +1241,11 @@ const copyPortalLink = async () => {
                                 </div>
                             </div>
 
-                            <Button v-else :disabled="portalShareForm.processing" @click="createPortalShare">
+                            <Button
+                                v-else
+                                :disabled="portalShareForm.processing"
+                                @click="createPortalShare"
+                            >
                                 <Globe class="size-4" />
                                 Generate portal link
                             </Button>
@@ -1024,9 +1286,7 @@ const copyPortalLink = async () => {
                                 briefs. Files are stored privately and download
                                 through the app.
                             </p>
-                            <InputError
-                                :message="attachmentForm.errors.file"
-                            />
+                            <InputError :message="attachmentForm.errors.file" />
                             <Button
                                 type="submit"
                                 :disabled="
@@ -1059,11 +1319,9 @@ const copyPortalLink = async () => {
                                         </div>
                                         <div class="min-w-0 space-y-1">
                                             <p
-                                                class="break-words font-semibold text-slate-950 dark:text-white"
+                                                class="font-semibold break-words text-slate-950 dark:text-white"
                                             >
-                                                {{
-                                                    attachment.original_name
-                                                }}
+                                                {{ attachment.original_name }}
                                             </p>
                                             <div
                                                 class="flex flex-wrap gap-3 text-sm text-slate-500 dark:text-slate-400"

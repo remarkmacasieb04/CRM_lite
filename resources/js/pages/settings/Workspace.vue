@@ -114,11 +114,13 @@ const submitWorkspace = () => {
                     >
                         <div class="min-w-0 space-y-2">
                             <p
-                                class="break-words text-2xl font-semibold tracking-tight text-slate-950 dark:text-white"
+                                class="text-2xl font-semibold tracking-tight break-words text-slate-950 dark:text-white"
                             >
                                 {{ workspace.name }}
                             </p>
-                            <p class="break-words text-sm text-slate-500 dark:text-slate-400">
+                            <p
+                                class="text-sm break-words text-slate-500 dark:text-slate-400"
+                            >
                                 Slug: {{ workspace.slug }}
                             </p>
                         </div>
@@ -132,25 +134,37 @@ const submitWorkspace = () => {
 
                     <div class="grid gap-4 sm:grid-cols-2">
                         <div class="crm-subtle-panel min-w-0">
-                            <p class="text-sm font-medium text-slate-500 dark:text-slate-400">
+                            <p
+                                class="text-sm font-medium text-slate-500 dark:text-slate-400"
+                            >
                                 Owner
                             </p>
-                            <p class="mt-2 break-words font-semibold text-slate-950 dark:text-white">
+                            <p
+                                class="mt-2 font-semibold break-words text-slate-950 dark:text-white"
+                            >
                                 {{ workspace.owner.name || 'Unknown' }}
                             </p>
-                            <p class="break-words text-sm text-slate-500 dark:text-slate-400">
+                            <p
+                                class="text-sm break-words text-slate-500 dark:text-slate-400"
+                            >
                                 {{ workspace.owner.email || 'No email' }}
                             </p>
                         </div>
 
                         <div class="crm-subtle-panel min-w-0">
-                            <p class="text-sm font-medium text-slate-500 dark:text-slate-400">
+                            <p
+                                class="text-sm font-medium text-slate-500 dark:text-slate-400"
+                            >
                                 Members
                             </p>
-                            <p class="mt-2 font-semibold text-slate-950 dark:text-white">
+                            <p
+                                class="mt-2 font-semibold text-slate-950 dark:text-white"
+                            >
                                 {{ workspace.members.length }}
                             </p>
-                            <p class="text-sm text-slate-500 dark:text-slate-400">
+                            <p
+                                class="text-sm text-slate-500 dark:text-slate-400"
+                            >
                                 {{
                                     workspace.is_personal
                                         ? 'Personal workspace'
@@ -174,15 +188,21 @@ const submitWorkspace = () => {
                             class="crm-list-item grid gap-4 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center"
                         >
                             <div class="min-w-0">
-                                <p class="break-words font-semibold text-slate-950 dark:text-white">
+                                <p
+                                    class="font-semibold break-words text-slate-950 dark:text-white"
+                                >
                                     {{ item.name }}
                                 </p>
-                                <p class="break-words text-sm text-slate-500 dark:text-slate-400">
+                                <p
+                                    class="text-sm break-words text-slate-500 dark:text-slate-400"
+                                >
                                     {{ item.slug }}
                                 </p>
                             </div>
 
-                            <div class="flex flex-wrap items-center gap-2 sm:justify-end">
+                            <div
+                                class="flex flex-wrap items-center gap-2 sm:justify-end"
+                            >
                                 <UserRoleBadge
                                     :role="item.role"
                                     :label="item.role ?? 'member'"
@@ -192,7 +212,10 @@ const submitWorkspace = () => {
                                     variant="outline"
                                     as-child
                                 >
-                                    <Link :href="workspaceRoutes.switch(item.id)" method="patch">
+                                    <Link
+                                        :href="workspaceRoutes.switch(item.id)"
+                                        method="patch"
+                                    >
                                         Switch
                                     </Link>
                                 </Button>
@@ -213,25 +236,38 @@ const submitWorkspace = () => {
                     </CardHeader>
                     <CardContent class="space-y-4">
                         <p class="text-sm text-slate-500 dark:text-slate-400">
-                            Create a new shared workspace when you want a separate client base for another brand, team, or business unit.
+                            Create a new shared workspace when you want a
+                            separate client base for another brand, team, or
+                            business unit.
                         </p>
-                        <form class="space-y-3" @submit.prevent="submitWorkspace">
+                        <form
+                            class="space-y-3"
+                            @submit.prevent="submitWorkspace"
+                        >
                             <div class="grid gap-2">
-                                <Label for="workspace-name">Workspace name</Label>
+                                <Label for="workspace-name"
+                                    >Workspace name</Label
+                                >
                                 <Input
                                     id="workspace-name"
                                     v-model="workspaceForm.name"
                                     class="h-11 rounded-xl"
                                     placeholder="Northwind Studio"
                                 />
-                                <InputError :message="workspaceForm.errors.name" />
+                                <InputError
+                                    :message="workspaceForm.errors.name"
+                                />
                             </div>
 
-                            <div class="flex flex-col gap-3 sm:flex-row sm:items-center">
+                            <div
+                                class="flex flex-col gap-3 sm:flex-row sm:items-center"
+                            >
                                 <Button :disabled="workspaceForm.processing">
                                     Create workspace
                                 </Button>
-                                <p class="text-sm leading-6 text-slate-500 dark:text-slate-400">
+                                <p
+                                    class="text-sm leading-6 text-slate-500 dark:text-slate-400"
+                                >
                                     You will switch into it right away.
                                 </p>
                             </div>
@@ -257,7 +293,9 @@ const submitWorkspace = () => {
                     >
                         <div class="min-w-0">
                             <div class="flex flex-wrap items-center gap-2">
-                                <p class="break-words font-semibold text-slate-950 dark:text-white">
+                                <p
+                                    class="font-semibold break-words text-slate-950 dark:text-white"
+                                >
                                     {{ member.name }}
                                 </p>
                                 <span
@@ -267,7 +305,9 @@ const submitWorkspace = () => {
                                     You
                                 </span>
                             </div>
-                            <p class="break-all text-sm text-slate-500 dark:text-slate-400">
+                            <p
+                                class="text-sm break-all text-slate-500 dark:text-slate-400"
+                            >
                                 {{ member.email }}
                             </p>
                         </div>
@@ -288,7 +328,10 @@ const submitWorkspace = () => {
                 description="Invite someone who already has an account in this CRM Lite install into the current workspace."
             />
 
-            <form class="crm-panel crm-panel-body space-y-5" @submit.prevent="submitMember">
+            <form
+                class="crm-panel crm-panel-body space-y-5"
+                @submit.prevent="submitMember"
+            >
                 <div class="grid gap-5 md:grid-cols-2">
                     <div class="grid gap-2">
                         <Label for="workspace-member-email">User email</Label>
@@ -303,7 +346,9 @@ const submitWorkspace = () => {
                     </div>
 
                     <div class="grid gap-2">
-                        <Label for="workspace-member-role">Workspace role</Label>
+                        <Label for="workspace-member-role"
+                            >Workspace role</Label
+                        >
                         <select
                             id="workspace-member-role"
                             v-model="memberForm.role"
@@ -326,7 +371,8 @@ const submitWorkspace = () => {
                         Add to workspace
                     </Button>
                     <p class="text-sm text-slate-500 dark:text-slate-400">
-                        Members can switch into this workspace after they are added.
+                        Members can switch into this workspace after they are
+                        added.
                     </p>
                 </div>
             </form>

@@ -24,5 +24,5 @@ withDefaults(defineProps<Props>(), {
         class="block shrink-0 object-contain"
         :class="className"
         v-bind="$attrs"
-    >
+    />
 </template>
