@@ -1,6 +1,6 @@
-# CRM Lite
+# NextCLient
 
-CRM Lite is a Laravel 13 + Vue 3 + Inertia.js CRM for freelancers and small service businesses. It ships with custom Fortify-based authentication, optional Socialite login, a polished SaaS-style dashboard, client management, searchable records, client notes, archive workflows, reminder tooling, and production-safe defaults.
+NextCLient is a Laravel 13 + Vue 3 + Inertia.js CRM for freelancers and small service businesses. It ships with custom Fortify-based authentication, optional Socialite login, a polished SaaS-style dashboard, client management, searchable records, client notes, archive workflows, reminder tooling, and production-safe defaults.
 
 ## Stack
 
@@ -109,11 +109,11 @@ GITHUB_CLIENT_SECRET=
 GITHUB_REDIRECT_URI="${APP_URL}/auth/github/callback"
 ```
 
-If a provider is missing credentials, CRM Lite hides that button and fails gracefully if its callback is hit directly.
+If a provider is missing credentials, NextCLient hides that button and fails gracefully if its callback is hit directly.
 
 ## Demo Accounts
 
-If you run the local sample seeder, CRM Lite creates these accounts:
+If you run the local sample seeder, NextCLient creates these accounts:
 
 - `owner@example.com` / `password`
   Role: `admin`
@@ -216,7 +216,7 @@ The default drivers are chosen for simple VPS deployment:
 - `CACHE_STORE=database`
 - `QUEUE_CONNECTION=database`
 
-For SQLite-specific backups, CRM Lite includes:
+For SQLite-specific backups, NextCLient includes:
 
 ```bash
 php artisan crm:backup:sqlite
