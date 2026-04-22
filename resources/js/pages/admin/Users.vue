@@ -87,7 +87,7 @@ const saveRole = (user: AdminUserListItem) => {
             <StatCard
                 title="Total users"
                 :value="users.length"
-                description="Everyone with an account in this CRM Lite install."
+                description="Everyone with an account in this NextClient install."
                 :icon="UsersRound"
             />
             <StatCard

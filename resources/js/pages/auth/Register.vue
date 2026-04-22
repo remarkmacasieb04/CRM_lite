@@ -13,7 +13,7 @@ import { store } from '@/routes/register';
 
 defineOptions({
     layout: {
-        title: 'Create your CRM Lite account',
+        title: 'Create your NextClient account',
         description:
             'Start with a clean, secure workspace for leads, active clients, and follow-ups.',
     },

@@ -30,7 +30,7 @@ const copy = {
     503: {
         title: 'Temporarily unavailable',
         description:
-            'CRM Lite is briefly unavailable while the application recovers or updates.',
+            'NextClient is briefly unavailable while the application recovers or updates.',
     },
 }[props.status] ?? {
     title: 'Unexpected error',

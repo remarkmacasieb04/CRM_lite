@@ -285,7 +285,7 @@ const deleteSavedView = (savedView: SavedClientView) => {
                                     class="text-xs leading-5 text-slate-500 dark:text-slate-400"
                                 >
                                     If an imported row matches one of your
-                                    existing client emails, CRM Lite updates
+                                    existing client emails, NextClient updates
                                     that client instead of creating a duplicate.
                                 </p>
                                 <p

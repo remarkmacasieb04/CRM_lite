@@ -1,7 +1,7 @@
 <div style="font-family: Arial, sans-serif; color: #0f172a; line-height: 1.6;">
     <h1 style="margin-bottom: 8px;">Your follow-up digest</h1>
     <p style="margin-top: 0;">
-        Hello {{ $user->name }}, here is your CRM Lite follow-up summary for {{ $digestDateLabel }}.
+        Hello {{ $user->name }}, here is your NextClient follow-up summary for {{ $digestDateLabel }}.
     </p>
 
     <p>

@@ -54,7 +54,7 @@ defineProps<{
                 <p
                     class="text-sm font-semibold tracking-[0.2em] text-emerald-600 uppercase dark:text-emerald-300"
                 >
-                    {{ portal.workspace || 'CRM Lite' }}
+                    {{ portal.workspace || 'NextClient' }}
                 </p>
                 <h1
                     class="mt-4 text-3xl font-semibold tracking-tight text-slate-950 dark:text-white"

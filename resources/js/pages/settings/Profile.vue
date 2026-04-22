@@ -340,7 +340,7 @@ function disconnectProvider(providerName: string, label: string): void {
             <Heading
                 variant="small"
                 title="Reminder emails"
-                description="Choose whether CRM Lite should email you a follow-up digest when clients need attention."
+                description="Choose whether NextClient should email you a follow-up digest when clients need attention."
             />
 
             <Form
