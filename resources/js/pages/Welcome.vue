@@ -25,7 +25,7 @@ const isAuthenticated = computed(() => page.props.auth.user !== null);
 </script>
 
 <template>
-    <Head title="CRM Lite">
+    <Head title="NextClient">
         <link rel="icon" href="/CRM-lite-logo.ico" sizes="any" />
         <link rel="icon" href="/CRM-lite-logo.svg" type="image/svg+xml" />
     </Head>
@@ -50,7 +50,7 @@ const isAuthenticated = computed(() => page.props.auth.user !== null);
                 <div class="rounded-2xl bg-white/10 p-2.5 ring-1 ring-white/10">
                     <img
                         src="/CRM-lite-logo.svg"
-                        alt="CRM Lite logo"
+                        alt="NextClient logo"
                         class="size-10 rounded-xl object-contain"
                     />
                 </div>
@@ -58,7 +58,7 @@ const isAuthenticated = computed(() => page.props.auth.user !== null);
                     <p
                         class="text-sm font-semibold tracking-[0.22em] text-emerald-300 uppercase"
                     >
-                        CRM Lite
+                        NextClient
                     </p>
                     <p class="text-sm text-slate-300">
                         Client relationships, simplified
@@ -113,7 +113,7 @@ const isAuthenticated = computed(() => page.props.auth.user !== null);
                     moving.
                 </h1>
                 <p class="mt-6 max-w-2xl text-lg leading-8 text-slate-300">
-                    CRM Lite gives freelancers and small service teams a calm,
+                    NextClient gives freelancers and small service teams a calm,
                     premium-looking workspace for leads, proposals, follow-ups,
                     notes, and delivery. Spend less time chasing details and
                     more time looking organized in front of clients.
@@ -240,25 +240,37 @@ const isAuthenticated = computed(() => page.props.auth.user !== null);
                                 sticky notes or spreadsheets.
                             </p>
                             <div
-                                class="mt-6 grid grid-cols-3 gap-3 text-center text-xs tracking-[0.2em] text-slate-400 uppercase"
+                                class="mt-6 grid grid-cols-3 gap-2 text-center text-slate-400 uppercase sm:gap-3"
                             >
-                                <div class="rounded-2xl bg-white/5 px-3 py-3">
+                                <div class="min-w-0 rounded-2xl bg-white/5 px-2 py-3 sm:px-3">
                                     <p class="text-lg font-semibold text-white">
                                         8
                                     </p>
-                                    Leads
+                                    <p
+                                        class="mt-1 text-[0.65rem] leading-tight tracking-[0.12em]"
+                                    >
+                                        Leads
+                                    </p>
                                 </div>
-                                <div class="rounded-2xl bg-white/5 px-3 py-3">
+                                <div class="min-w-0 rounded-2xl bg-white/5 px-2 py-3 sm:px-3">
                                     <p class="text-lg font-semibold text-white">
                                         11
                                     </p>
-                                    Active
+                                    <p
+                                        class="mt-1 text-[0.65rem] leading-tight tracking-[0.12em]"
+                                    >
+                                        Active
+                                    </p>
                                 </div>
-                                <div class="rounded-2xl bg-white/5 px-3 py-3">
+                                <div class="min-w-0 rounded-2xl bg-white/5 px-2 py-3 sm:px-1">
                                     <p class="text-lg font-semibold text-white">
                                         3
                                     </p>
-                                    Awaiting reply
+                                    <p
+                                        class="mt-1 text-[0.65rem] leading-tight tracking-[0.08em]"
+                                    >
+                                        Awaiting reply
+                                    </p>
                                 </div>
                             </div>
                         </div>

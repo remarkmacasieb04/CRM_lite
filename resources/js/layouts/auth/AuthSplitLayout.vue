@@ -64,7 +64,7 @@ defineProps<{
                     chaos.
                 </h1>
                 <p class="mt-6 max-w-2xl text-lg leading-8 text-slate-300/95">
-                    CRM Lite gives solo operators a calm, fast home for leads,
+                    NextClient gives solo operators a calm, fast home for leads,
                     follow-ups, notes, and account activity with the polish of a
                     modern SaaS product.
                 </p>

@@ -324,7 +324,7 @@ const submitWorkspace = () => {
             <Heading
                 variant="small"
                 title="Add an existing user"
-                description="Invite someone who already has an account in this CRM Lite install into the current workspace."
+                description="Invite someone who already has an account in this NextClient install into the current workspace."
             />
 
             <form

@@ -26,7 +26,7 @@ class FollowUpReminderDigestMail extends Mailable implements ShouldQueue
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: "Your CRM Lite follow-up digest for {$this->digestDateLabel}",
+            subject: "Your NextClient follow-up digest for {$this->digestDateLabel}",
         );
     }
 

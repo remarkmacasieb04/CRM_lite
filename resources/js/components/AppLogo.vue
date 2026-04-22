@@ -8,7 +8,7 @@ import AppLogoIcon from '@/components/AppLogoIcon.vue';
     />
     <div class="ml-2 grid flex-1 text-left text-sm">
         <span class="mb-0.5 truncate leading-tight font-semibold">
-            CRM Lite
+            NextClient
         </span>
         <span class="truncate text-xs text-slate-500 dark:text-slate-400">
             Freelancer workspace

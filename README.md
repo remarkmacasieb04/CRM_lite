@@ -1,6 +1,6 @@
-# NextClient
+# NextClientnt
 
-NextClient is a Laravel 13 + Vue 3 + Inertia.js CRM for freelancers and small service businesses. It ships with custom Fortify-based authentication, optional Socialite login, a polished SaaS-style dashboard, client management, searchable records, client notes, archive workflows, reminder tooling, and production-safe defaults.
+NextClientnt is a Laravel 13 + Vue 3 + Inertia.js CRM for freelancers and small service businesses. It ships with custom Fortify-based authentication, optional Socialite login, a polished SaaS-style dashboard, client management, searchable records, client notes, archive workflows, reminder tooling, and production-safe defaults.
 
 ## Stack
 
@@ -109,11 +109,11 @@ GITHUB_CLIENT_SECRET=
 GITHUB_REDIRECT_URI="${APP_URL}/auth/github/callback"
 ```
 
-If a provider is missing credentials, NextClient hides that button and fails gracefully if its callback is hit directly.
+If a provider is missing credentials, NextClientnt hides that button and fails gracefully if its callback is hit directly.
 
 ## Demo Accounts
 
-If you run the local sample seeder, NextClient creates these accounts:
+If you run the local sample seeder, NextClientnt creates these accounts:
 
 - `owner@example.com` / `password`
   Role: `admin`
@@ -216,7 +216,7 @@ The default drivers are chosen for simple VPS deployment:
 - `CACHE_STORE=database`
 - `QUEUE_CONNECTION=database`
 
-For SQLite-specific backups, NextClient includes:
+For SQLite-specific backups, NextClientnt includes:
 
 ```bash
 php artisan crm:backup:sqlite
